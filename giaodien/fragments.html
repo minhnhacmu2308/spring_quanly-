@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head th:fragment="html_head">
+    <!-- Required Meta Tags Always Come First -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Title -->
+    <title>Dashboard | Front - Admin &amp; Dashboard Template</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico">
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- CSS Implementing Plugins -->
+    <link rel="stylesheet" href="assets\css\vendor.min.css">
+    <link rel="stylesheet" href="assets\vendor\icon-set\style.css">
+    
+    
+
+    <!-- CSS Front Template -->
+    <link rel="stylesheet" href="assets\css\theme.min.css?v=1.0">
+    <script src="assets\vendor\hs-navbar-vertical-aside\hs-navbar-vertical-aside-mini-cache.js"></script>
+     <!-- JS Implementing Plugins -->
+     <script src="assets\js\vendor.min.js"></script>
+     <script src="assets\vendor\chart.js\dist\Chart.min.js"></script>
+     <script src="assets\vendor\chart.js.extensions\chartjs-extensions.js"></script>
+     <script src="assets\vendor\chartjs-plugin-datalabels\dist\chartjs-plugin-datalabels.min.js"></script>
+     
+     <script src="assets\js\demo.js"></script>
+ 
+     <!-- JS Front -->
+     <script src="assets\js\theme.min.js"></script>
+ 
+     <!-- JS Plugins Init. -->
+     <script>
+       $(document).on('ready', function () {
+         // ONLY DEV
+         // =======================================================
+         
+           if (window.localStorage.getItem('hs-builder-popover') === null) {
+             $('#builderPopover').popover('show')
+               .on('shown.bs.popover', function () {
+                 $('.popover').last().addClass('popover-dark')
+               });
+ 
+             $(document).on('click', '#closeBuilderPopover' , function() {
+               window.localStorage.setItem('hs-builder-popover', true);
+               $('#builderPopover').popover('dispose');
+             });
+           } else {
+             $('#builderPopover').on('show.bs.popover', function () {
+               return false
+             });
+           }
+         
+         // END ONLY DEV
+         // =======================================================
+ 
+ 
+         // BUILDER TOGGLE INVOKER
+         // =======================================================
+         $('.js-navbar-vertical-aside-toggle-invoker').click(function () {
+           $('.js-navbar-vertical-aside-toggle-invoker i').tooltip('hide');
+         });
+ 
+         
+           // INITIALIZATION OF MEGA MENU
+           // =======================================================
+           var megaMenu = new HSMegaMenu($('.js-mega-menu'), {
+             desktop: {
+               position: 'left'
+             }
+           }).init();
+         
+ 
+         
+         // INITIALIZATION OF NAVBAR VERTICAL NAVIGATION
+         // =======================================================
+         var sidebar = $('.js-navbar-vertical-aside').hsSideNav();
+ 
+         
+         // INITIALIZATION OF TOOLTIP IN NAVBAR VERTICAL MENU
+         // =======================================================
+         $('.js-nav-tooltip-link').tooltip({ boundary: 'window' })
+ 
+         $(".js-nav-tooltip-link").on("show.bs.tooltip", function(e) {
+           if (!$("body").hasClass("navbar-vertical-aside-mini-mode")) {
+             return false;
+           }
+         });
+ 
+         
+         // INITIALIZATION OF UNFOLD
+         // =======================================================
+         $('.js-hs-unfold-invoker').each(function () {
+           var unfold = new HSUnfold($(this)).init();
+         });
+ 
+         
+         // INITIALIZATION OF FORM SEARCH
+         // =======================================================
+         $('.js-form-search').each(function () {
+           new HSFormSearch($(this)).init()
+         });
+ 
+         
+         // INITIALIZATION OF SELECT2
+         // =======================================================
+         $('.js-select2-custom').each(function () {
+           var select2 = $.HSCore.components.HSSelect2.init($(this));
+         });
+ 
+         
+         // INITIALIZATION OF CHARTJS
+         // =======================================================
+         Chart.plugins.unregister(ChartDataLabels);
+ 
+         $('.js-chart').each(function () {
+           $.HSCore.components.HSChartJS.init($(this));
+         });
+ 
+         var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
+ 
+         // CALL WHEN TAB IS CLICKED
+         // =======================================================
+         $('[data-toggle="chart-bar"]').click(function(e) {
+           let keyDataset = $(e.currentTarget).attr('data-datasets')
+ 
+          if (keyDataset === 'lastWeek') {
+            updatingChart.data.labels = ["Apr 22", "Apr 23", "Apr 24", "Apr 25", "Apr 26", "Apr 27", "Apr 28", "Apr 29", "Apr 30", "Apr 31"];
+            updatingChart.data.datasets = [
+              {
+                "data": [120, 250, 300, 200, 300, 290, 350, 100, 125, 320],
+                "backgroundColor": "#377dff",
+                "hoverBackgroundColor": "#377dff",
+                "borderColor": "#377dff"
+              },
+              {
+                "data": [250, 130, 322, 144, 129, 300, 260, 120, 260, 245, 110],
+                "backgroundColor": "#e7eaf3",
+                "borderColor": "#e7eaf3"
+              }
+            ];
+            updatingChart.update();
+          } else {
+            updatingChart.data.labels = ["May 1", "May 2", "May 3", "May 4", "May 5", "May 6", "May 7", "May 8", "May 9", "May 10"];
+            updatingChart.data.datasets = [
+              {
+                "data": [200, 300, 290, 350, 150, 350, 300, 100, 125, 220],
+                "backgroundColor": "#377dff",
+                "hoverBackgroundColor": "#377dff",
+                "borderColor": "#377dff"
+              },
+              {
+                "data": [150, 230, 382, 204, 169, 290, 300, 100, 300, 225, 120],
+                "backgroundColor": "#e7eaf3",
+                "borderColor": "#e7eaf3"
+              }
+            ]
+            updatingChart.update();
+          }
+         })
+ 
+         
+         // INITIALIZATION OF BUBBLE CHARTJS WITH DATALABELS PLUGIN
+         // =======================================================
+         $('.js-chart-datalabels').each(function () {
+           $.HSCore.components.HSChartJS.init($(this), {
+             plugins: [ChartDataLabels],
+             options: {
+               plugins: {
+                 datalabels: {
+                   anchor: function(context) {
+                     var value = context.dataset.data[context.dataIndex];
+                     return value.r < 20 ? 'end' : 'center';
+                   },
+                   align: function(context) {
+                     var value = context.dataset.data[context.dataIndex];
+                     return value.r < 20 ? 'end' : 'center';
+                   },
+                   color: function(context) {
+                     var value = context.dataset.data[context.dataIndex];
+                     return value.r < 20 ? context.dataset.backgroundColor : context.dataset.color;
+                   },
+                   font: function(context) {
+                     var value = context.dataset.data[context.dataIndex],
+                       fontSize = 25;
+ 
+                     if (value.r > 50) {
+                       fontSize = 35;
+                     }
+ 
+                     if (value.r > 70) {
+                       fontSize = 55;
+                     }
+ 
+                     return {
+                       weight: 'lighter',
+                       size: fontSize
+                     };
+                   },
+                   offset: 2,
+                   padding: 0
+                 }
+               }
+             },
+           });
+         });
+ 
+         
+         // INITIALIZATION OF DATERANGEPICKER
+         // =======================================================
+         $('.js-daterangepicker').daterangepicker();
+ 
+         $('.js-daterangepicker-times').daterangepicker({
+           timePicker: true,
+           startDate: moment().startOf('hour'),
+           endDate: moment().startOf('hour').add(32, 'hour'),
+           locale: {
+             format: 'M/DD hh:mm A'
+           }
+         });
+ 
+         var start = moment();
+         var end = moment();
+ 
+         function cb(start, end) {
+           $('#js-daterangepicker-predefined .js-daterangepicker-predefined-preview').html(start.format('MMM D') + ' - ' + end.format('MMM D, YYYY'));
+         }
+ 
+         $('#js-daterangepicker-predefined').daterangepicker({
+           startDate: start,
+           endDate: end,
+           ranges: {
+             'Today': [moment(), moment()],
+             'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+             'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+             'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+             'This Month': [moment().startOf('month'), moment().endOf('month')],
+             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+           }
+         }, cb);
+ 
+         cb(start, end);
+ 
+         
+         // INITIALIZATION OF DATATABLES
+         // =======================================================
+         var datatable = $.HSCore.components.HSDatatables.init($('#datatable'), {
+           select: {
+             style: 'multi',
+             selector: 'td:first-child input[type="checkbox"]',
+             classMap: {
+               checkAll: '#datatableCheckAll',
+               counter: '#datatableCounter',
+               counterInfo: '#datatableCounterInfo'
+             }
+           },
+           language: {
+             zeroRecords: '<div class="text-center p-4">' +
+                 '<img class="mb-3" src="./assets/svg/illustrations/sorry.svg" alt="Image Description" style="width: 7rem;">' +
+                 '<p class="mb-0">No data to show</p>' +
+                 '</div>'
+           }
+         });
+ 
+         $('.js-datatable-filter').on('change', function() {
+           var $this = $(this),
+             elVal = $this.val(),
+             targetColumnIndex = $this.data('target-column-index');
+ 
+           datatable.column(targetColumnIndex).search(elVal).draw();
+         });
+ 
+         $('#datatableSearch').on('mouseup', function (e) {
+           var $input = $(this),
+             oldValue = $input.val();
+ 
+           if (oldValue == "") return;
+ 
+           setTimeout(function(){
+             var newValue = $input.val();
+ 
+             if (newValue == ""){
+               // Gotcha
+               datatable.search('').draw();
+             }
+           }, 1);
+         });
+ 
+         
+         // INITIALIZATION OF CLIPBOARD
+         // =======================================================
+         $('.js-clipboard').each(function() {
+           var clipboard = $.HSCore.components.HSClipboard.init(this);
+         });
+       });
+     </script>
+ 
+     <!-- IE Support -->
+     <script>
+       if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) document.write('<script src="./assets/vendor/babel-polyfill/polyfill.min.js"><\/script>');
+     </script>
+  </head>
+
+  <body class="   footer-offset">
+
+    <!-- ========== START LAYOUT CONTENT ========== -->
+    <div th:fragment="html_layout">
+      <!-- Builder -->
+      <div id="styleSwitcherDropdown" class="hs-unfold-content sidebar sidebar-bordered sidebar-box-shadow" style="width: 35rem;">
+        <div class="card card-lg border-0 h-100">
+          <div class="card-header align-items-start">
+            <div class="mr-2">
+              <h3 class="card-header-title">Front Builder</h3>
+              <p>Customize your overview page layout. Choose the one that best fits your needs.</p>
+            </div>
+
+            <!-- Toggle Button -->
+            <a class="js-hs-unfold-invoker btn btn-icon btn-xs btn-ghost-dark" href="javascript:;" data-hs-unfold-options='{
+                  "target": "#styleSwitcherDropdown",
+                  "type": "css-animation",
+                  "animationIn": "fadeInRight",
+                  "animationOut": "fadeOutRight",
+                  "hasOverlay": true,
+                  "smartPositionOff": true
+                 }'>
+              <i class="tio-clear tio-lg"></i>
+            </a>
+            <!-- End Toggle Button -->
+          </div>
+
+          <!-- Body -->
+          <div class="card-body sidebar-scrollbar">
+            <h4 class="mb-1">Layout skins <span id="js-builder-disabled" class="badge badge-soft-danger" style="opacity: 0">Disabled</span></h4>
+            <p>3 kinds of layout skins to choose from.</p>
+
+            <div class="row gx-2 mb-5">
+              <!-- Custom Radio -->
+              <div class="col-4 text-center">
+                <div class="text-center">
+                  <div class="custom-checkbox-card mb-2">
+                    <input type="radio" class="custom-checkbox-card-input" name="layoutSkinsRadio" id="layoutSkinsRadio1" checked="" value="default">
+                    <label class="custom-checkbox-card-label" for="layoutSkinsRadio1">
+                      <img class="custom-checkbox-card-img" src="assets\svg\layouts\layouts-sidebar-default.svg" alt="Image Description">
+                    </label>
+                    <span class="custom-checkbox-card-text">Default</span>
+                  </div>
+                </div>
+              </div>
+              <!-- End Custom Radio -->
+
+              <!-- Custom Radio -->
+              <div class="col-4 text-center">
+                <div class="text-center">
+                  <div class="custom-checkbox-card mb-2">
+                    <input type="radio" class="custom-checkbox-card-input" name="layoutSkinsRadio" id="layoutSkinsRadio2" value="navbar-dark">
+                    <label class="custom-checkbox-card-label" for="layoutSkinsRadio2">
+                      <img class="custom-checkbox-card-img" src="assets\svg\layouts\layouts-sidebar-dark.svg" alt="Image Description">
+                    </label>
+                    <span class="custom-checkbox-card-text">Dark</span>
+                  </div>
+                </div>
+              </div>
+              <!-- End Custom Radio -->
+
+              <!-- Custom Radio -->
+              <div class="col-4 text-center">
+                <div class="text-center">
+                  <div class="custom-checkbox-card mb-2">
+                    <input type="radio" class="custom-checkbox-card-input" name="layoutSkinsRadio" id="layoutSkinsRadio3" value="navbar-light">
+                    <label class="custom-checkbox-card-label" for="layoutSkinsRadio3">
+                      <img class="custom-checkbox-card-img" src="assets\svg\layouts\layouts-sidebar-light.svg" alt="Image Description">
+                    </label>
+                    <span class="custom-checkbox-card-text">Light</span>
+                  </div>
+                </div>
+              </div>
+              <!-- End Custom Radio -->
+            </div>
+            <!-- End Row -->
+          </div>
+          <!-- End Body -->
+          <!-- Footer -->
+          <div class="card-footer">
+            <div class="row gx-2">
+              <div class="col">
+                <button type="button" id="js-builder-reset" class="btn btn-block btn-lg btn-white">
+                  <i class="tio-restore"></i> Reset
+                </button>
+              </div>
+              <div class="col">
+                <button type="button" id="js-builder-preview" class="btn btn-block btn-lg btn-primary">
+                  <i class="tio-visible"></i> Preview
+                </button>
+              </div>
+            </div>
+            <!-- End Row -->
+          </div>
+          <!-- End Footer -->
+        </div>
+      </div>
+      <!-- End Builder -->
+
+      
+      <!-- End Builder Toggle -->
+
+      <!-- JS Preview mode only -->
+      <div id="headerMain" class="d-none"><header id="header" class="navbar navbar-expand-lg navbar-fixed navbar-height navbar-flush navbar-container navbar-bordered">
+  <div class="navbar-nav-wrap">
+    <div class="navbar-brand-wrapper">
+      <!-- Logo -->
+      <a class="navbar-brand" href="index.html" aria-label="Front">
+        <img class="navbar-brand-logo" src="assets\svg\logos\logo.svg" alt="Logo">
+        <img class="navbar-brand-logo-mini" src="assets\svg\logos\logo-short.svg" alt="Logo">
+      </a>
+      <!-- End Logo -->
+    </div>
+
+    <div class="navbar-nav-wrap-content-left">
+      <!-- Navbar Vertical Toggle -->
+      <button type="button" class="js-navbar-vertical-aside-toggle-invoker close mr-3">
+        <i class="tio-first-page navbar-vertical-aside-toggle-short-align" data-toggle="tooltip" data-placement="right" title="Collapse"></i>
+        <i class="tio-last-page navbar-vertical-aside-toggle-full-align" data-template='<div class="tooltip d-none d-sm-block" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>' data-toggle="tooltip" data-placement="right" title="Expand"></i>
+      </button>
+      <!-- End Navbar Vertical Toggle -->
+
+      <!-- Search Form -->
+      <div class="d-none d-md-block">
+        <form class="position-relative">
+          <!-- Input Group -->
+          <div class="input-group input-group-merge input-group-borderless input-group-hover-light navbar-input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">
+                <i class="tio-search"></i>
+              </div>
+            </div>
+            <input type="search" class="js-form-search form-control" placeholder="Search in front" aria-label="Search in front" data-hs-form-search-options='{
+                     "clearIcon": "#clearSearchResultsIcon",
+                     "dropMenuElement": "#searchDropdownMenu",
+                     "dropMenuOffset": 20,
+                     "toggleIconOnFocus": true,
+                     "activeClass": "focus"
+                   }'>
+            <a class="input-group-append" href="javascript:;">
+              <span class="input-group-text">
+                <i id="clearSearchResultsIcon" class="tio-clear" style="display: none;"></i>
+              </span>
+            </a>
+          </div>
+          <!-- End Input Group -->
+
+          
+          <!-- End Card Search Content -->
+        </form>
+      </div>
+      <!-- End Search Form -->
+    </div>
+
+    <!-- Secondary Content -->
+    <div class="navbar-nav-wrap-content-right">
+      <!-- Navbar -->
+      <ul class="navbar-nav align-items-center flex-row">
+        <li class="nav-item d-md-none">
+          <!-- Search Trigger -->
+          <div class="hs-unfold">
+            <a class="js-hs-unfold-invoker btn btn-icon btn-ghost-secondary rounded-circle" href="javascript:;" data-hs-unfold-options='{
+                 "target": "#searchDropdown",
+                 "type": "css-animation",
+                 "animationIn": "fadeIn",
+                 "hasOverlay": "rgba(46, 52, 81, 0.1)",
+                 "closeBreakpoint": "md"
+               }'>
+              <i class="tio-search"></i>
+            </a>
+          </div>
+          <!-- End Search Trigger -->
+        </li>
+
+        <li class="nav-item d-none d-sm-inline-block">
+          <!-- Notification -->
+          <div class="hs-unfold">
+            <a class="js-hs-unfold-invoker btn btn-icon btn-ghost-secondary rounded-circle" href="javascript:;" data-hs-unfold-options='{
+                 "target": "#notificationDropdown",
+                 "type": "css-animation"
+               }'>
+              <i class="tio-notifications-on-outlined"></i>
+              <span class="btn-status btn-sm-status btn-status-danger"></span>
+            </a>
+
+            <div id="notificationDropdown" class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-right navbar-dropdown-menu" style="width: 25rem;">
+              <!-- Header -->
+              <div class="card-header">
+                <span class="card-title h4">Notifications</span>
+
+                <!-- End Unfold -->
+              </div>
+              <!-- End Header -->
+
+
+              <!-- Body -->
+              <div class="card-body-height">
+                <!-- Tab Content -->
+                <div class="tab-content" id="notificationTabContent">
+                  <div class="tab-pane fade show active" id="notificationNavOne" role="tabpanel" aria-labelledby="notificationNavOne-tab">
+                    <ul class="list-group list-group-flush navbar-card-list-group">
+                      <!-- Item -->
+                      <li class="list-group-item custom-checkbox-list-wrapper">
+                        <div class="row">
+                          <div class="col-auto position-static">
+                            <div class="d-flex align-items-center">
+                              <div class="custom-control custom-checkbox custom-checkbox-list">
+                                <input type="checkbox" class="custom-control-input" id="notificationCheck1" checked="">
+                                <label class="custom-control-label" for="notificationCheck1"></label>
+                                <span class="custom-checkbox-list-stretched-bg"></span>
+                              </div>
+                              <div class="avatar avatar-sm avatar-circle">
+                                <img class="avatar-img" src="assets\img\160x160\img3.jpg" alt="Image Description">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col ml-n3">
+                            <span class="card-title h5">Brian Warner</span>
+                            <p class="card-text font-size-sm">changed an issue from "In Progress" to <span class="badge badge-success">Review</span></p>
+                          </div>
+                          <small class="col-auto text-muted text-cap">2hr</small>
+                        </div>
+                        <a class="stretched-link" href="#"></a>
+                      </li>
+                      <!-- End Item -->
+
+                      
+
+                      <!-- Item -->
+                      <li class="list-group-item custom-checkbox-list-wrapper">
+                        <div class="row">
+                          <div class="col-auto position-static">
+                            <div class="d-flex align-items-center">
+                              <div class="custom-control custom-checkbox custom-checkbox-list">
+                                <input type="checkbox" class="custom-control-input" id="notificationCheck4" checked="">
+                                <label class="custom-control-label" for="notificationCheck4"></label>
+                                <span class="custom-checkbox-list-stretched-bg"></span>
+                              </div>
+                              <div class="avatar avatar-sm avatar-circle">
+                                <img class="avatar-img" src="assets\img\160x160\img10.jpg" alt="Image Description">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col ml-n3">
+                            <span class="card-title h5">Ruby Walter</span>
+                            <p class="card-text font-size-sm">joined the Slack group HS Team</p>
+                          </div>
+                          <small class="col-auto text-muted text-cap">3dy</small>
+                        </div>
+                        <a class="stretched-link" href="#"></a>
+                      </li>
+                      <!-- End Item -->
+                      <!-- Item -->
+                      <li class="list-group-item custom-checkbox-list-wrapper">
+                        <div class="row">
+                          <div class="col-auto position-static">
+                            <div class="d-flex align-items-center">
+                              <div class="custom-control custom-checkbox custom-checkbox-list">
+                                <input type="checkbox" class="custom-control-input" id="notificationCheck1" checked="">
+                                <label class="custom-control-label" for="notificationCheck1"></label>
+                                <span class="custom-checkbox-list-stretched-bg"></span>
+                              </div>
+                              <div class="avatar avatar-sm avatar-circle">
+                                <img class="avatar-img" src="assets\img\160x160\img3.jpg" alt="Image Description">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col ml-n3">
+                            <span class="card-title h5">Brian Warner</span>
+                            <p class="card-text font-size-sm">changed an issue from "In Progress" to <span class="badge badge-success">Review</span></p>
+                          </div>
+                          <small class="col-auto text-muted text-cap">2hr</small>
+                        </div>
+                        <a class="stretched-link" href="#"></a>
+                      </li>
+                      <!-- End Item -->
+
+                      
+
+                      <!-- Item -->
+                      <li class="list-group-item custom-checkbox-list-wrapper">
+                        <div class="row">
+                          <div class="col-auto position-static">
+                            <div class="d-flex align-items-center">
+                              <div class="custom-control custom-checkbox custom-checkbox-list">
+                                <input type="checkbox" class="custom-control-input" id="notificationCheck4" checked="">
+                                <label class="custom-control-label" for="notificationCheck4"></label>
+                                <span class="custom-checkbox-list-stretched-bg"></span>
+                              </div>
+                              <div class="avatar avatar-sm avatar-circle">
+                                <img class="avatar-img" src="assets\img\160x160\img10.jpg" alt="Image Description">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col ml-n3">
+                            <span class="card-title h5">Ruby Walter</span>
+                            <p class="card-text font-size-sm">joined the Slack group HS Team</p>
+                          </div>
+                          <small class="col-auto text-muted text-cap">3dy</small>
+                        </div>
+                        <a class="stretched-link" href="#"></a>
+                      </li>
+                      <!-- End Item -->
+                    </ul>
+                  </div>
+                </div>
+                <!-- End Tab Content -->
+              </div>
+              <!-- End Body -->
+
+              <!-- End Card Footer -->
+            </div>
+          </div>
+          <!-- End Notification -->
+        </li>
+
+
+        <li class="nav-item">
+          <!-- Account -->
+          <div class="hs-unfold">
+            <a class="js-hs-unfold-invoker navbar-dropdown-account-wrapper" href="javascript:;" data-hs-unfold-options='{
+                 "target": "#accountNavbarDropdown",
+                 "type": "css-animation"
+               }'>
+              <div class="avatar avatar-sm avatar-circle">
+                <img class="avatar-img" src="assets\img\160x160\img6.jpg" alt="Image Description">
+                <span class="avatar-status avatar-sm-status avatar-status-success"></span>
+              </div>
+            </a>
+
+            <div id="accountNavbarDropdown" class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-right navbar-dropdown-menu navbar-dropdown-account" style="width: 16rem;">
+              <div class="dropdown-item-text">
+                <div class="media align-items-center">
+                  <div class="avatar avatar-sm avatar-circle mr-2">
+                    <img class="avatar-img" src="assets\img\160x160\img6.jpg" alt="Image Description">
+                  </div>
+                  <div class="media-body">
+                    <span class="card-title h5">Mark Williams</span>
+                    <span class="card-text">mark@example.com</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dropdown-divider"></div>
+
+
+              <a class="dropdown-item" href="#">
+                <span class="text-truncate pr-2" title="Profile &amp; account">Profile &amp; account</span>
+              </a>
+              <a class="dropdown-item" href="#">
+                <span class="text-truncate pr-2" title="Sign out">Sign out</span>
+              </a>
+
+              <div class="dropdown-divider"></div>
+
+              <a class="dropdown-item" href="#">
+                <div class="media align-items-center">
+                  <div class="avatar avatar-sm avatar-dark avatar-circle mr-2">
+                    <span class="avatar-initials">HS</span>
+                  </div>
+                  <div class="media-body">
+                    <span class="card-title h5">Htmlstream <span class="badge badge-primary badge-pill text-uppercase ml-1">PRO</span></span>
+                    <span class="card-text">hs.example.com</span>
+                  </div>
+                </div>
+              </a>
+             
+            </div>
+          </div>
+          <!-- End Account -->
+        </li>
+      </ul>
+      <!-- End Navbar -->
+    </div>
+    <!-- End Secondary Content -->
+  </div>
+</header></div>
+      <div id="headerFluid" class="d-none"><header id="header" class="navbar navbar-expand-xl navbar-fixed navbar-height navbar-flush navbar-container navbar-bordered  ">
+  <div class="js-mega-menu navbar-nav-wrap">
+
+  </div>
+</header></div>
+      <div id="headerDouble" class="d-none"><header id="header" class="navbar navbar-expand-lg navbar-bordered flex-lg-column px-0">
+
+  
+</header></div>
+      <div id="sidebarMain" class="d-none"><aside class="js-navbar-vertical-aside navbar navbar-vertical-aside navbar-vertical navbar-vertical-fixed navbar-expand-xl navbar-bordered  ">
+  <div class="navbar-vertical-container">
+    <div class="navbar-vertical-footer-offset">
+      <div class="navbar-brand-wrapper justify-content-between">
+        <!-- Logo -->
+        
+        
+          <a class="navbar-brand" href="index.html" aria-label="Front">
+            <img class="navbar-brand-logo" src="assets\svg\logos\logo.svg" alt="Logo">
+            <img class="navbar-brand-logo-mini" src="assets\svg\logos\logo-short.svg" alt="Logo">
+          </a>
+        
+        <!-- End Logo -->
+
+        <!-- Navbar Vertical Toggle -->
+        <button type="button" class="js-navbar-vertical-aside-toggle-invoker navbar-vertical-aside-toggle btn btn-icon btn-xs btn-ghost-dark">
+          <i class="tio-clear tio-lg"></i>
+        </button>
+        <!-- End Navbar Vertical Toggle -->
+      </div>
+
+      <!-- Content -->
+      <div class="navbar-vertical-content">
+        <ul class="navbar-nav navbar-nav-lg nav-tabs">
+          <!-- Dashboards -->
+          <li class="navbar-vertical-aside-has-menu show">
+            <a class="js-nav-tooltip-link nav-link active" href="dashboard.html" data-placement="left" title="Home">
+              <i class="tio-home-vs-1-outlined nav-icon"></i>
+              <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Home</span>
+            </a>
+          </li>
+          <!-- End Dashboards -->
+
+          <li class="nav-item">
+            <small class="nav-subtitle" title="Management">Management</small>
+            <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+          </li>
+
+          <!-- Pages -->
+          <li class="nav-item ">
+            <a class="js-nav-tooltip-link nav-link " href="project.html" title="Quản lý dự án" data-placement="left">
+              <i class="tio-pages-outlined nav-icon"></i>
+              <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Quản lý dự án</span>
+            </a>
+          </li>
+          <!-- End Pages -->
+
+          <!-- Apps -->
+          <li class="nav-item ">
+            <a class="js-nav-tooltip-link nav-link " href="welcome-page.html" title="Quản lý rủi ro" data-placement="left">
+              <i class="tio-apps nav-icon"></i>
+              <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Quản lý rủi ro </span>
+            </a>
+
+            
+          </li>
+          <!-- End Apps -->
+
+          <!-- Authentication -->
+          <li class="nav-item ">
+            <a class="js-nav-tooltip-link nav-link " href="welcome-page.html" title="Quản lý tài khoản" data-placement="left">
+              <i class="tio-lock-outlined nav-icon"></i>
+              <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Quản lý tài khoản</span>
+            </a>
+          </li>
+          <!-- End Authentication -->
+
+          <li class="nav-item ">
+            <a class="js-nav-tooltip-link nav-link " href="welcome-page.html" title="Quản lý tài liệu" data-placement="left">
+              <i class="tio-book-opened nav-icon"></i>
+              <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Quản lý tài liệu</span>
+            </a>
+          </li>
+
+          
+
+          <li class="nav-item">
+            <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+          </li>
+
+          <!-- Front Builder -->
+          <li class="nav-item nav-footer-item ">
+            <a class="d-none d-md-flex js-hs-unfold-invoker nav-link nav-link-toggle" href="javascript:;" data-hs-unfold-options='{
+                 "target": "#styleSwitcherDropdown",
+                 "type": "css-animation",
+                 "animationIn": "fadeInRight",
+                 "animationOut": "fadeOutRight",
+                 "hasOverlay": true,
+                 "smartPositionOff": true
+               }'>
+              <i class="tio-tune nav-icon"></i>
+            </a>
+            <a class="d-flex d-md-none nav-link nav-link-toggle" href="javascript:;">
+              <i class="tio-tune nav-icon"></i>
+            </a>
+          </li>
+          <!-- End Front Builder -->
+        </ul>
+      </div>
+      <!-- End Content -->
+
+      <!-- Footer -->
+      <div class="navbar-vertical-footer">
+        <ul class="navbar-vertical-footer-list">
+          <li class="navbar-vertical-footer-list-item">
+            <!-- Unfold -->
+            <div class="hs-unfold">
+              <a class="js-hs-unfold-invoker btn btn-icon btn-ghost-secondary rounded-circle" href="javascript:;" data-hs-unfold-options='{
+                  "target": "#styleSwitcherDropdown",
+                  "type": "css-animation",
+                  "animationIn": "fadeInRight",
+                  "animationOut": "fadeOutRight",
+                  "hasOverlay": true,
+                  "smartPositionOff": true
+                 }'>
+                <i class="tio-tune"></i>
+              </a>
+            </div>
+            <!-- End Unfold -->
+          </li>
+
+          
+        </ul>
+      </div>
+      <!-- End Footer -->
+    </div>
+  </div>
+</aside></div>
+      <div id="sidebarCompact" class="d-none"><aside class="js-navbar-vertical-aside navbar navbar-vertical-aside navbar-vertical navbar-vertical-fixed navbar-expand-xl navbar-bordered  ">
+  <div class="navbar-vertical-container">
+    <div class="navbar-brand d-flex justify-content-center">
+      <!-- Logo -->
+      
+      
+        <a class="navbar-brand" href="index.html" aria-label="Front">
+          <img class="navbar-brand-logo-short" src="assets\svg\logos\logo-short.svg" alt="Logo">
+        </a>
+      
+      <!-- End Logo -->
+    </div>
+
+    <!-- End Content -->
+  </div>
+</aside></div>
+
+      <script src="assets\js\demo.js"></script>
+    
+    <!-- END ONLY DEV -->
+
+    <!-- Search Form -->
+    <div id="searchDropdown" class="hs-unfold-content dropdown-unfold search-fullwidth d-md-none">
+      <form class="input-group input-group-merge input-group-borderless">
+        <div class="input-group-prepend">
+          <div class="input-group-text">
+            <i class="tio-search"></i>
+          </div>
+        </div>
+
+        <input class="form-control rounded-0" type="search" placeholder="Search in front" aria-label="Search in front">
+
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <div class="hs-unfold">
+              <a class="js-hs-unfold-invoker" href="javascript:;" data-hs-unfold-options='{
+                   "target": "#searchDropdown",
+                   "type": "css-animation",
+                   "animationIn": "fadeIn",
+                   "hasOverlay": "rgba(46, 52, 81, 0.1)",
+                   "closeBreakpoint": "md"
+                 }'>
+                <i class="tio-clear tio-lg"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- End Search Form -->
+  </div>
+<!-- END LAYOUT -->
+<!-- ========== START MAIN CONTENT ========== -->
+ 
+
+
+
+   
+  </body>
+</html>
