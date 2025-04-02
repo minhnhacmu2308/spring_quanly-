@@ -11,9 +11,11 @@ public class HomeController {
 
     @GetMapping({"/", "/home"})
     public ModelAndView index(HttpSession session) {
-        if (session.getAttribute("user") != null) {
-            return new ModelAndView("public/home");
-        }
-        return new ModelAndView(new RedirectView("/auth/login"));
+//        if (session.getAttribute("user") != null) {
+//            return new ModelAndView("public/home");
+//        }
+//        return new ModelAndView(new RedirectView("/auth/login"));
+
+        return new ModelAndView("public/home");
     }
 }
