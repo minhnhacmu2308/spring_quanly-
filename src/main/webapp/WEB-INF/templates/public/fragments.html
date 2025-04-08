@@ -473,7 +473,7 @@
                                                                     >
                                                                         <img
                                                                                 class="avatar-img"
-                                                                                src="assets\img\160x160\img3.jpg"
+                                                                                th:src="@{/public/assets/img/160x160/img3.jpg}"
                                                                                 alt="Image Description"
                                                                         />
                                                                     </div>
@@ -779,7 +779,7 @@
                     <div class="navbar-brand-wrapper justify-content-between">
                         <!-- Logo -->
 
-                        <a class="navbar-brand" href="index.html" aria-label="Front">
+                        <a class="navbar-brand" href="home" aria-label="Front">
                             <img
                                     class="navbar-brand-logo"
                                     src="assets\svg\logos\logo.svg"
@@ -811,7 +811,7 @@
                             <li class="navbar-vertical-aside-has-menu show">
                                 <a
                                         class="js-nav-tooltip-link nav-link active"
-                                        href="index.html"
+                                        href="home"
                                         data-placement="left"
                                         title="Home"
                                 >
@@ -837,7 +837,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="projectqly.html"
+                                        href="project"
                                         title="Projects Management"
                                         data-placement="left"
                                 >
@@ -854,7 +854,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="risk.html"
+                                        href="risk"
                                         title="Risks Management"
                                         data-placement="left"
                                 >
@@ -871,7 +871,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="user.html"
+                                        href="account"
                                         title="Users Management"
                                         data-placement="left"
                                 >
@@ -887,7 +887,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="document.html"
+                                        href="document"
                                         title="Documents Management"
                                         data-placement="left"
                                 >
@@ -913,10 +913,11 @@
                 <div class="navbar-brand d-flex justify-content-center">
                     <!-- Logo -->
 
-                    <a class="navbar-brand" href="index.html" aria-label="Front">
+                    <a class="navbar-brand" href="home" aria-label="Front">
                         <img
                                 class="navbar-brand-logo-short"
-                                src="assets\svg\logos\logo-short.svg"
+
+                                th:src="@{/public/assets/svg/logos/logo-short.svg}"
                                 alt="Logo"
                         />
                     </a>

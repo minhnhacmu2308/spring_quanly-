@@ -19,13 +19,5 @@ public class HomeController {
         return new ModelAndView("public/home");
     }
 
-    @GetMapping({"/project"})
-    public ModelAndView project(HttpSession session) {
-//        if (session.getAttribute("user") != null) {
-//            return new ModelAndView("public/home");
-//        }
-//        return new ModelAndView(new RedirectView("/auth/login"));
 
-        return new ModelAndView("public/project");
-    }
 }
