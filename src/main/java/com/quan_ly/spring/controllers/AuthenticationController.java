@@ -38,9 +38,9 @@ public class AuthenticationController {
 
         if (userOptional.isPresent()) {
             session.setAttribute("user", userOptional.get());
-            return "redirect:/home"; // Điều hướng đến trang chủ
+            return "redirect:/user/home"; // Điều hướng đến trang chủ
         } else {
-            model.addAttribute("error", "Email hoặc mật khẩu không đúng");
+            model.addAttribute("error", "Email or password incorrect");
             return "public/login"; // Quay lại trang login với thông báo lỗi
         }
     }

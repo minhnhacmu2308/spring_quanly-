@@ -10,4 +10,8 @@ public final class CommonConstant {
     public static final String MSG_REGISTER_SUCCESS = "msg_register_success";
 
     public static final String DIR_UPLOAD = "resources/uploads";
+
+    public static final String ERROR_MESSAGE = "errorMessage";
+    public static final String SUCCESS_MESSAGE = "successMessage";
+
 }

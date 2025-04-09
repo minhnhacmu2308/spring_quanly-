@@ -20,6 +20,8 @@
 
     <!-- CSS Front Template -->
     <link rel="stylesheet" th:href="@{/public/assets/css/theme.min.css?v=1.0}">
+
+
     <script th:src="@{/public/assets/vendor/hs-navbar-vertical-aside/hs-navbar-vertical-aside-mini-cache.js}"></script>
     <!-- JS Implementing Plugins -->
     <script th:src="@{/public/assets/js/vendor.min.js}"></script>
@@ -29,6 +31,56 @@
 
     <!-- JS Front -->
     <script th:src="@{/public/assets/js/theme.min.js}"></script>
+    <style>
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            animation: slideInLeft 0.5s ease forwards;
+        }
+
+        .toast-body {
+            background-color: #fff;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            min-width: 250px;
+            font-weight: 500;
+        }
+
+        .toast-success {
+            border-left: 6px solid #28a745;
+        }
+
+        .toast-error {
+            border-left: 6px solid #dc3545;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const toast = document.getElementById("customToast");
+            if (toast) {
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.5s ease';
+                    toast.style.opacity = 0;
+                    setTimeout(() => toast.remove(), 500); // Remove from DOM
+                }, 5000);
+            }
+        });
+    </script>
 
     <!-- JS Plugins Init. -->
     <script>
@@ -303,7 +355,15 @@
 </head>
 
 <body class="   footer-offset">
-
+<div th:fragment="html_toast" id="customToast" class="custom-toast"
+     th:if="${successMessage != null or errorMessage != null}">
+    <div th:if="${successMessage != null}" class="toast-body toast-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage != null}" class="toast-body toast-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+</div>
 <!-- ========== START LAYOUT CONTENT ========== -->
 <th:block th:fragment="html_header">
     <div id="headerMain" class="d-none">
@@ -527,7 +587,7 @@
                                                                     >
                                                                         <img
                                                                                 class="avatar-img"
-                                                                                src="assets\img\160x160\img10.jpg"
+                                                                                th:src="@{/public/assets/mg/160x160/img10.jpg}"
                                                                                 alt="Image Description"
                                                                         />
                                                                     </div>
@@ -577,7 +637,7 @@
                                                                     >
                                                                         <img
                                                                                 class="avatar-img"
-                                                                                src="assets\img\160x160\img3.jpg"
+                                                                                th:src="@{/public/assets/img/160x160/img3.jpg}"
                                                                                 alt="Image Description"
                                                                         />
                                                                     </div>
@@ -631,7 +691,7 @@
                                                                     >
                                                                         <img
                                                                                 class="avatar-img"
-                                                                                src="assets\img\160x160\img10.jpg"
+                                                                                th:src="@{/public/assets/160x160/img10.jpg}"
                                                                                 alt="Image Description"
                                                                         />
                                                                     </div>
@@ -854,7 +914,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="risk"
+                                        href="/user/risk"
                                         title="Risks Management"
                                         data-placement="left"
                                 >
@@ -871,7 +931,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="account"
+                                        href="/user/account"
                                         title="Users Management"
                                         data-placement="left"
                                 >
@@ -887,7 +947,7 @@
                             <li class="nav-item">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="document"
+                                        href="/user/document"
                                         title="Documents Management"
                                         data-placement="left"
                                 >

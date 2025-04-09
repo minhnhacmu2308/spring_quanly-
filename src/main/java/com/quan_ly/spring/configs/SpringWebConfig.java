@@ -1,5 +1,6 @@
 package com.quan_ly.spring.configs;
 
+import com.quan_ly.spring.interceptor.LoginInterceptor;
 import com.quan_ly.spring.utils.AuthMiddleware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -19,6 +20,16 @@ public class SpringWebConfig implements WebMvcConfigurer {
 
     @Autowired
     private AuthMiddleware authMiddleware;
+
+    @Autowired
+    private LoginInterceptor loginInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loginInterceptor)
+                .addPathPatterns("/user/**") // Những URL cần login
+                .excludePathPatterns("/auth/login", "/css/**", "/js/**", "/images/**"); // Những URL không cần login
+    }
 
     @Bean
     public SpringResourceTemplateResolver templateResolver(){
@@ -56,13 +67,5 @@ public class SpringWebConfig implements WebMvcConfigurer {
         // NOTE 'order' and 'viewNames' are optional
 
         return viewResolver;
-    }
-
-
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authMiddleware)
-                .addPathPatterns("/user/**"); // Áp dụng middleware cho tất cả các đường dẫn
     }
 }
