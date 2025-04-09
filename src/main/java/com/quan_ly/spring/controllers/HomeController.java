@@ -8,7 +8,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
-@RequestMapping("/user")
 public class HomeController {
     @GetMapping({"/", "/home"})
     public ModelAndView index(HttpSession session) {
