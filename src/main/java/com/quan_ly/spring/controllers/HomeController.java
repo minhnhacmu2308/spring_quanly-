@@ -9,7 +9,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class HomeController {
-    @GetMapping({"/", "/home"})
+    @GetMapping({"/", "/user/home"})
     public ModelAndView index(HttpSession session) {
         if (session.getAttribute("user") != null) {
             return new ModelAndView("public/home");
