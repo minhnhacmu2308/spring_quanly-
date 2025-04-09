@@ -59,15 +59,15 @@
                                 <div id="usersExportDropdown" class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
                                     <span class="dropdown-header">Download options</span>
                                     <a id="export-excel" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\excel.svg" alt="Image Description">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\excel.svg" alt="">
                                         Excel
                                     </a>
                                     <a id="export-csv" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\components\placeholder-csv-format.svg" alt="Image Description">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\components\placeholder-csv-format.svg" alt="">
                                         .CSV
                                     </a>
                                     <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\pdf.svg" alt="Image Description">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\pdf.svg" alt="">
                                         PDF
                                     </a>
                                 </div>
@@ -112,89 +112,99 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- Dự án đang triển khai -->
-                    <tr>
-                        <td>Project A</td>
-                        <td>Hanoi, Vietnam</td>
-                        <td>2025-04-01</td>
-                        <td>2025-12-30</td>
-                        <td><span class="legend-indicator bg-warning"></span> IN_PROGRESS</td>
+                    <tr th:each="project, iterStat : ${projects}">
+                        <td th:text="${project.projectName}">Project Name</td>
+                        <td th:text="${project.location}">Location</td>
+                        <td th:text="${project.startDate}">Start Date</td>
+                        <td th:text="${project.endDate}">End Date</td>
+
                         <td>
-                            <a class="d-flex align-items-center" href="manager-profile.html">
-                                <div class="avatar avatar-circle">
-                                    <img class="avatar-img" src="assets/img/160x160/img1.jpg" alt="Manager Image">
-                                </div>
-                                <div class="ml-3">
-                                    <span class="d-block h5 text-hover-primary mb-0">John Doe</span>
-                                    <span class="d-block font-size-sm text-body">johndoe@example.com</span>
-                                </div>
-                            </a>
+        <span class="legend-indicator"
+              th:classappend="'bg-' + (${project.status} == 'IN_PROGRESS' ? 'warning' : (${project.status} == 'COMPLETED' ? 'success' : 'secondary'))">
+        </span>
+                            <span th:text="${project.status}">Status</span>
                         </td>
+
                         <td>
-                            <a class="btn btn-sm btn-success" href="javascript:;" data-toggle="modal" data-target="#editProjectModal">
+                                <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.manager != null ? project.manager.fullName : 'N/A'}">Manager Name</span>
+                                    <span class="d-block font-size-sm text-body"
+                                          th:text="${project.manager != null ? project.manager.email : ''}">Manager Email</span>
+                                </div>
+                        </td>
+
+                        <td>
+                            <a class="btn btn-sm btn-success" href="javascript:;"
+                               th:attr="data-toggle='modal', data-target='#editProjectModal' + ${project.projectId}">
                                 <i class="tio-edit"></i> Edit
                             </a>
-                            <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteProjectModal">
+                            <button class="btn btn-sm btn-danger"
+                                    th:attr="data-toggle='modal', data-target='#deleteProjectModal' + ${project.projectId}">
                                 <i class="tio-delete"></i> Delete
                             </button>
                         </td>
-                    </tr>
+                        <!-- Modal Chỉnh Sửa -->
+                        <div class="modal fade" th:id="'editProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Edit Project</h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form th:action="@{/project/edit/{id}(id=${project.projectId})}" method="post" id="editProjectForm">
+                                            <input type="hidden" name="id" th:value="${project.projectId}" />
+                                            <div class="form-group">
+                                                <label>Project Name</label>
+                                                <input type="text" class="form-control" th:value="${project.projectName}" name="projectName">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Location</label>
+                                                <input type="text" class="form-control" th:value="${project.location}" name="location">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Start Date</label>
+                                                <input type="date" class="form-control" th:value="${project.startDate}" name="startDate">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>End Date</label>
+                                                <input type="date" class="form-control" th:value="${project.endDate}" name="endDate">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Status</label>
+                                                <select class="form-control" id="projectStatus" name="status" required>
+                                                    <option value="IN_PROGRESS" th:selected="${project.status == 'IN_PROGRESS'}">In Progress</option>
+                                                    <option value="COMPLETED" th:selected="${project.status == 'COMPLETED'}">Completed</option>
+                                                    <option value="ON_HOLD" th:selected="${project.status == 'ON_HOLD'}">On Hold</option>
+                                                </select>
 
-
-                    <!-- Dự án đã hoàn thành -->
-                    <tr>
-                        <td>Project B</td>
-                        <td>Da Nang, Vietnam</td>
-                        <td>2024-06-15</td>
-                        <td>2025-03-20</td>
-                        <td><span class="legend-indicator bg-success"></span> COMPLETED</td>
-                        <td>
-                            <a class="d-flex align-items-center" href="manager-profile.html">
-                                <div class="avatar avatar-circle">
-                                    <img class="avatar-img" src="assets/img/160x160/img2.jpg" alt="Manager Image">
+                                            </div>
+                                            <button type="submit" class="btn btn-success">Save Changes</button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <div class="ml-3">
-                                    <span class="d-block h5 text-hover-primary mb-0">Jane Smith</span>
-                                    <span class="d-block font-size-sm text-body">janesmith@example.com</span>
+                            </div>
+                        </div>
+                        <!-- Modal Xóa -->
+                        <div class="modal fade" id="deleteProjectModal" th:id="'deleteProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Delete</h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <form th:action="@{'/project/delete/' + ${project.projectId}}" method="get">
+                                    <div class="modal-body">
+                                        <p>Are you sure you want to delete this project?</p>
+                                        <p>Project : <b th:text="${project.projectName}"></b> </p>
+                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    </div>
+                                    </form>
                                 </div>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="btn btn-sm btn-success" href="javascript:;" data-toggle="modal" data-target="#editProjectModal">
-                                <i class="tio-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteProjectModal">
-                                <i class="tio-delete"></i> Delete
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- Dự án đang tạm dừng -->
-                    <tr>
-                        <td>Project C</td>
-                        <td>Ho Chi Minh City, Vietnam</td>
-                        <td>2025-02-10</td>
-                        <td>2026-01-15</td>
-                        <td><span class="legend-indicator bg-danger"></span> ON_HOLD</td>
-                        <td>
-                            <a class="d-flex align-items-center" href="manager-profile.html">
-                                <div class="avatar avatar-circle">
-                                    <img class="avatar-img" src="assets/img/160x160/img3.jpg" alt="Manager Image">
-                                </div>
-                                <div class="ml-3">
-                                    <span class="d-block h5 text-hover-primary mb-0">Alice Nguyen</span>
-                                    <span class="d-block font-size-sm text-body">alicenguyen@example.com</span>
-                                </div>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="btn btn-sm btn-success" href="javascript:;" data-toggle="modal" data-target="#editProjectModal">
-                                <i class="tio-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteProjectModal">
-                                <i class="tio-delete"></i> Delete
-                            </button>
-                        </td>
+                            </div>
+                        </div>
                     </tr>
                     </tbody>
                 </table>
@@ -247,58 +257,7 @@
         <!-- End Card -->
     </div>
     <!-- End Content -->
-    <!-- Modal Chỉnh Sửa -->
-    <div class="modal fade" id="editProjectModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Project</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label>Project Name</label>
-                            <input type="text" class="form-control" value="Project A">
-                        </div>
-                        <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" class="form-control" value="Hanoi, Vietnam">
-                        </div>
-                        <div class="form-group">
-                            <label>Start Date</label>
-                            <input type="date" class="form-control" value="2025-04-01">
-                        </div>
-                        <div class="form-group">
-                            <label>End Date</label>
-                            <input type="date" class="form-control" value="2025-12-30">
-                        </div>
-                        <div class="form-group">
-                            <label>Manager</label>
-                            <input type="text" class="form-control" value="John Doe">
-                        </div>
-                        <button type="submit" class="btn btn-success">Save Changes</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal Xóa -->
-    <div class="modal fade" id="deleteProjectModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete this project?</p>
-                    <button type="button" class="btn btn-danger">Yes, Delete</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
     <!--Modal Add Project-->
     <div class="modal fade" id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -310,34 +269,30 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="addProjectForm">
+                    <form th:action="@{/project/create}" method="post" >
                         <div class="form-group">
                             <label for="projectName">Project Name</label>
-                            <input type="text" class="form-control" id="projectName" required>
+                            <input type="text" class="form-control" id="projectName" name="projectName" required>
                         </div>
                         <div class="form-group">
-                            <label for="projectLocation">Location</label>
-                            <input type="text" class="form-control" id="projectLocation" required>
+                            <label for="location">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" required>
                         </div>
                         <div class="form-group">
                             <label for="startDate">Start Date</label>
-                            <input type="date" class="form-control" id="startDate" required>
+                            <input type="date" class="form-control" id="startDate" name="startDate" required>
                         </div>
                         <div class="form-group">
                             <label for="endDate">End Date</label>
-                            <input type="date" class="form-control" id="endDate" required>
+                            <input type="date" class="form-control" id="endDate" name="endDate" required>
                         </div>
                         <div class="form-group">
                             <label for="projectStatus">Status</label>
-                            <select class="form-control" id="projectStatus" required>
+                            <select class="form-control" id="projectStatus" name="status" required>
                                 <option value="IN_PROGRESS">In Progress</option>
                                 <option value="COMPLETED">Completed</option>
                                 <option value="ON_HOLD">On Hold</option>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="projectManager">Manager</label>
-                            <input type="text" class="form-control" id="projectManager" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
