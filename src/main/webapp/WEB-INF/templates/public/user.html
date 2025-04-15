@@ -123,14 +123,21 @@
                         </td>
                         <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm:ss')}">2025-03-30</td>
                         <td>
-                            <a class="btn btn-sm btn-success" href="javascript:;" data-toggle="modal"  th:data-target="'#editUserModal'+${user.userId}"
-                               th:attr="data-id=${user.userId}, data-fullname=${user.fullName}, data-email=${user.email}, data-role=${user.role}">
-                                <i class="tio-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-sm btn-danger" data-toggle="modal"  th:data-target="'#deleteUserModal'+${user.userId}"
-                                    th:attr="data-id=${user.userId}">
-                                <i class="tio-delete"></i> Delete
-                            </button>
+                            <div th:if="${session.user.role.name() == 'MANAGER' and user.role.name() != 'MANAGER'}">
+                                <!-- Edit button -->
+                                <a class="btn btn-sm btn-success" href="javascript:;" data-toggle="modal"
+                                   th:data-target="'#editUserModal'+${user.userId}"
+                                   th:attr="data-id=${user.userId}, data-fullname=${user.fullName}, data-email=${user.email}, data-role=${user.role}">
+                                    <i class="tio-edit"></i> Edit
+                                </a>
+
+                                <!-- Delete button -->
+                                <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                        th:data-target="'#deleteUserModal'+${user.userId}"
+                                        th:attr="data-id=${user.userId}">
+                                    <i class="tio-delete"></i> Delete
+                                </button>
+                            </div>
                         </td>
                         <!-- Edit User Modal -->
                         <div class="modal fade" th:id="'editUserModal'+${user.userId}" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">

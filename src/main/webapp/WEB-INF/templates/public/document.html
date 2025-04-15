@@ -15,7 +15,7 @@
                     <h1 class="page-header-title">Documents Management</h1>
                 </div>
 
-                <div class="col-sm-auto">
+                <div  class="col-sm-auto" th:if="${session.user.role.name() == 'MANAGER'}">
                     <button class="btn btn-primary" data-toggle="modal" data-target="#addDocumentModal">
                         <i class="tio-add mr-1"></i> Add Document
                     </button>
@@ -116,40 +116,56 @@
                             <a  th:href="${doc.filePath}" download th:text="${doc.filePath}"></a>
                         </td>
                         <td th:text="${doc.uploadedBy.fullName}"></td>
-                        <td th:text="${#temporals.format(doc.uploadedAt, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${#temporals.format(doc.uploadedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
                         <td>
-<!--                            <button class="btn btn-sm btn-info"-->
-<!--                                    data-toggle="modal" th:attr="data-target='#previewFileModal' + ${doc.documentId}"-->
-<!--                                    th:attrappend="data-filepath=${doc.filePath}, data-docid=${doc.documentId}"-->
-<!--                                    onclick="previewFile(this)">-->
-<!--                                <i class="tio-visible"></i>-->
-<!--                            </button>-->
-                            <a class="btn btn-sm btn-success" href="javascript:;"
+                            <button class="btn btn-sm btn-info"
+                                    data-toggle="modal" th:attr="data-target='#pdfModal' + ${doc.documentId}">
+                                <i class="tio-visible"></i>
+                            </button>
+                            <a class="btn btn-sm btn-success" th:if="${session.user.role.name() == 'MANAGER'}" href="javascript:;"
                                data-toggle="modal" th:attr="data-target='#editDocumentModal' + ${doc.documentId}"
                               >
                                 <i class="tio-edit"></i> Edit
                             </a>
 
                             <button class="btn btn-sm btn-danger"
-                                    data-toggle="modal" th:attr="data-target='#deleteDocumentModal' + ${doc.documentId}">
+                                    data-toggle="modal" th:attr="data-target='#deleteDocumentModal' + ${doc.documentId}" th:if="${session.user.role.name() == 'MANAGER'}">
                                 <i class="tio-delete"></i> Delete
                             </button>
                         </td>
-                        <!-- Pre view Modal -->
-                        <div class="modal fade" th:id="'previewFileModal' + ${doc.documentId}" tabindex="-1"  role="dialog" aria-hidden="true">
-                            <div class="modal-dialog modal-xl" role="document">
+                        <!-- Modal hiển thị PDF -->
+                        <div class="modal fade" th:id="'pdfModal' + ${doc.documentId}"  tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Xem file: </h5>
-                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                                        <h5 class="modal-title" id="pdfModalLabel">Preview Document</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
                                     </div>
-                                    <div class="modal-body" th:id="'previewFileModal' + ${doc.documentId}" style="min-height: 600px; display: flex; align-items: center; justify-content: center;">
-                                        <!-- Nội dung sẽ được nạp ở đây bằng JS -->
+                                    <div class="modal-body">
+                                        <!-- Kiểm tra loại file -->
+                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.pdf') or #strings.endsWith(doc.filePath, '.txt')}">
+                                            <iframe th:src="${doc.filePath}" width="100%" height="700px"></iframe>
+
+                                            <!-- Nếu là TXT, hiển thị thêm nút tải xuống -->
+                                            <th:block th:if="${#strings.endsWith(doc.filePath, '.txt')}">
+                                                <div style="text-align: center; margin-top: 10px;">
+                                                    <a th:href="${doc.filePath}" class="btn btn-success" download="document.txt">
+                                                        <i class="fas fa-download"></i> Download file TXT
+                                                    </a>
+                                                </div>
+                                            </th:block>
+                                        </th:block>
+
+                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.docx')}">
+                                            <p>This file cannot be previewed. Please download.</p>
+                                            <a th:href="${doc.filePath}" class="btn btn-success" target="_blank">Download document</a>
+                                        </th:block>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <!-- Edit Document Modal -->
                         <div class="modal fade" th:id="'editDocumentModal' + ${doc.documentId}"  tabindex="-1" role="dialog" aria-labelledby="editDocumentModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -265,7 +281,7 @@
             <div class="modal-content">
                 <form th:action="@{/user/document/add}" method="post" enctype="multipart/form-data">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addDocumentModalLabel">Add New Document</h5>
+                        <h5 class="modal-title" id="addDocumentModalLabel" >Add New Document</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -277,8 +293,8 @@
                             <input type="text" name="title" class="form-control" id="documentTitle" required>
                         </div>
                         <div class="form-group">
-                            <label for="documentFile">Upload File (Word/PDF)</label>
-                            <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf" required>
+                            <label for="documentFile">Upload File (Word/PDF/Txt)</label>
+                            <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt" required>
                         </div>
                     </div>
 

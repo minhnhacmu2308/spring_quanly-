@@ -44,4 +44,10 @@ public class AuthenticationController {
             return "public/login"; // Quay lại trang login với thông báo lỗi
         }
     }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); // Xóa session
+        return "redirect:/auth/login"; // Điều hướng về trang login
+    }
 }

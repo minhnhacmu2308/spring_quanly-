@@ -2,6 +2,7 @@ package com.quan_ly.spring.services.impls;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.quan_ly.spring.exceptions.DocumentUploadException;
 import com.quan_ly.spring.models.Document;
 import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.repositories.DocumentRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -40,21 +42,23 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Document saveDocument(MultipartFile file, String title, User user) {
         try {
-            System.out.println("Received file: " + file.getOriginalFilename());
-            System.out.println("Content type: " + file.getContentType());
-            System.out.println("Size: " + file.getSize());
 
-            // Chỉ cho phép file PDF và DOCX
+            String fileName = toSnakeCase(title);
+            String lastName = getExtension(file.getOriginalFilename());
+
+            // Cho phép các định dạng file: PDF, DOCX, TXT, ZIP
             String contentType = file.getContentType();
             if (!"application/pdf".equals(contentType) &&
-                    !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType)) {
-                throw new IllegalArgumentException("Chỉ chấp nhận file PDF hoặc DOCX.");
+                    !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&
+                    !"text/plain".equals(contentType) &&
+                    !"application/zip".equals(contentType)) {
+                throw new DocumentUploadException("Only PDF, DOCX, TXT files are accepted.");
             }
 
-            // Upload file với resource_type là "raw"
+            // Upload file lên Cloudinary với resource_type là "raw"
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
-                    "resource_type", "raw",
-                    "public_id", "documents/" + file.getOriginalFilename(),  // giữ tên gốc
+                    "resource_type", "raw",  // Giữ nguyên định dạng file
+                    "public_id", "documents/" + fileName + lastName,
                     "use_filename", true,
                     "unique_filename", false
             ));
@@ -69,8 +73,31 @@ public class DocumentServiceImpl implements DocumentService {
 
             return documentRepository.save(document);
         } catch (IOException e) {
-            throw new RuntimeException("Upload thất bại", e);
+            throw new DocumentUploadException("Upload failed");
         }
+    }
+
+
+    public static String toSnakeCase(String input) {
+        // B1: Chuẩn hóa unicode
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        // B2: Loại bỏ dấu
+        String noAccents = normalized.replaceAll("\\p{M}", "");
+
+        // B3: Thay khoảng trắng bằng dấu gạch dưới
+        String snake = noAccents.replaceAll("\\s+", "_");
+
+        // B4: Chuyển về chữ thường
+        return snake.toLowerCase();
+    }
+
+    public static String getExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex != -1 && lastDotIndex != fileName.length() - 1) {
+            return fileName.substring(lastDotIndex); // Lấy từ dấu chấm trở đi
+        }
+        return ""; // Không có đuôi
     }
 
 
@@ -78,27 +105,34 @@ public class DocumentServiceImpl implements DocumentService {
     public Document updateDocument(Long id, String title, MultipartFile file) {
         Document document = getDocumentById(id);
         document.setTitle(title);
+        String fileName = toSnakeCase(title);
+        String lastName = getExtension(file.getOriginalFilename());
 
         if (file != null && !file.isEmpty()) {
             try {
                 String contentType = file.getContentType();
+
+                // Kiểm tra loại file hợp lệ
                 if (!"application/pdf".equals(contentType) &&
-                        !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType)) {
-                    throw new IllegalArgumentException("Chỉ chấp nhận file PDF hoặc DOCX.");
+                        !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&
+                        !"text/plain".equals(contentType) &&
+                        !"application/zip".equals(contentType)) {
+                    throw new DocumentUploadException("Only PDF, DOCX, TXT files are accepted.");
                 }
 
-                // Upload file với resource_type là "raw"
+                // Upload file lên Cloudinary
                 Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
-                        "resource_type", "raw",
-                        "public_id", "documents/" + file.getOriginalFilename(),  // giữ tên gốc
+                        "resource_type", "raw", // Giữ nguyên file
+                        "public_id", "documents/" + fileName + "." + lastName,
                         "use_filename", true,
                         "unique_filename", false
                 ));
+                System.out.println(uploadResult);
 
                 String fileUrl = uploadResult.get("secure_url").toString();
                 document.setFilePath(fileUrl);
             } catch (IOException e) {
-                throw new RuntimeException("Upload failed", e);
+                throw new DocumentUploadException("Upload failed");
             }
         }
 
