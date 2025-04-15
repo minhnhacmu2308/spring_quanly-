@@ -105,13 +105,12 @@ public class DocumentServiceImpl implements DocumentService {
     public Document updateDocument(Long id, String title, MultipartFile file) {
         Document document = getDocumentById(id);
         document.setTitle(title);
-        String fileName = toSnakeCase(title);
-        String lastName = getExtension(file.getOriginalFilename());
 
         if (file != null && !file.isEmpty()) {
             try {
                 String contentType = file.getContentType();
-
+                String fileName = toSnakeCase(title);
+                String lastName = getExtension(file.getOriginalFilename());
                 // Kiểm tra loại file hợp lệ
                 if (!"application/pdf".equals(contentType) &&
                         !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&

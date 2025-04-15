@@ -177,7 +177,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/user/document/edit/{id}(id=${doc.documentId})}" method="post" id="editDocumentForm">
+                                        <form th:action="@{/user/document/edit/{id}(id=${doc.documentId})}" method="post" enctype="multipart/form-data" id="editDocumentForm">
                                             <div class="form-group">
                                                 <label for="editDocumentTitle">Title</label>
                                                 <input type="text" th:value="${doc.title}" name="title" class="form-control" id="editDocumentTitle" required>
@@ -186,8 +186,8 @@
                                                 <label for="editFilePath">File Path</label>
                                                 <p th:text="${doc.filePath}"></p>
                                                 <div class="form-group" id="editFilePath">
-                                                    <label for="documentFile">Upload File (Word/PDF)</label>
-                                                    <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf">
+                                                    <label for="documentFile">Upload File (Word/PDF/Txt)</label>
+                                                    <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt">
                                                 </div>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
