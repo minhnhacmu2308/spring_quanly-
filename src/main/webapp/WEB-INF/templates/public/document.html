@@ -99,7 +99,7 @@
                    }'>
                     <thead class="thead-light">
                     <tr>
-                        <th>ID</th>
+                        <th>Project</th>
                         <th>Title</th>
                         <th>File Path</th>
                         <th>Uploaded By</th>
@@ -110,10 +110,12 @@
                     <tbody>
 
                     <tr th:each="doc, indexStat : ${documents}">
-                        <td th:text="${indexStat.index + 1}"></td>
+                        <td th:text="${doc.project.projectName}"></td>
                         <td th:text="${doc.title}"></td>
                         <td>
-                            <a  th:href="${doc.filePath}" download th:text="${doc.filePath}"></a>
+                            <a th:href="${doc.filePath}" download
+                               th:text="${#strings.substring(doc.filePath, doc.filePath.lastIndexOf('/') + 1)}">
+                            </a>
                         </td>
                         <td th:text="${doc.uploadedBy.fullName}"></td>
                         <td th:text="${#temporals.format(doc.uploadedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
@@ -179,12 +181,21 @@
                                     <div class="modal-body">
                                         <form th:action="@{/user/document/edit/{id}(id=${doc.documentId})}" method="post" enctype="multipart/form-data" id="editDocumentForm">
                                             <div class="form-group">
+                                                <label for="projectId">Project</label>
+                                                <select class="form-control" name="projectId" required>
+                                                    <th:block th:each="project,index : ${projects}">
+                                                        <option th:if="${project.projectId == doc.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}" selected></option>
+                                                        <option th:if="${project.projectId != doc.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}"></option>
+                                                    </th:block>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label for="editDocumentTitle">Title</label>
                                                 <input type="text" th:value="${doc.title}" name="title" class="form-control" id="editDocumentTitle" required>
                                             </div>
                                             <div class="form-group">
-                                                <label for="editFilePath">File Path</label>
-                                                <p th:text="${doc.filePath}"></p>
+<!--                                                <label for="editFilePath">File Path</label>-->
+<!--                                                <p th:text="${doc.filePath}"></p>-->
                                                 <div class="form-group" id="editFilePath">
                                                     <label for="documentFile">Upload File (Word/PDF/Txt)</label>
                                                     <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt">
@@ -288,6 +299,15 @@
                     </div>
 
                     <div class="modal-body">
+                        <div class="form-group">
+                            <label for="projectId">Project</label>
+                            <select class="form-control" name="projectId" required>
+                                <option value="" selected>Choose a project</option>
+                                <th:block th:each="project,index : ${projects}">
+                                    <option th:value="${project.projectId}" th:text="${project.projectName}"></option>
+                                </th:block>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label for="documentTitle">Title</label>
                             <input type="text" name="title" class="form-control" id="documentTitle" required>

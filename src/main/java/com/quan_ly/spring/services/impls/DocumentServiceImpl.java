@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.quan_ly.spring.exceptions.DocumentUploadException;
 import com.quan_ly.spring.models.Document;
+import com.quan_ly.spring.models.Project;
 import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.repositories.DocumentRepository;
 import com.quan_ly.spring.services.DocumentService;
@@ -40,12 +41,12 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Document saveDocument(MultipartFile file, String title, User user) {
+    public Document saveDocument(MultipartFile file, String title, User user, Project project) {
         try {
 
-            String fileName = toSnakeCase(title);
-            String lastName = getExtension(file.getOriginalFilename());
-
+//            String fileName = toSnakeCase(title);
+//            String lastName = getExtension(file.getOriginalFilename());
+            String fileName = file.getOriginalFilename();
             // Cho phép các định dạng file: PDF, DOCX, TXT, ZIP
             String contentType = file.getContentType();
             if (!"application/pdf".equals(contentType) &&
@@ -58,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService {
             // Upload file lên Cloudinary với resource_type là "raw"
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
                     "resource_type", "raw",  // Giữ nguyên định dạng file
-                    "public_id", "documents/" + fileName + lastName,
+                    "public_id", "documents/" + fileName,
                     "use_filename", true,
                     "unique_filename", false
             ));
@@ -69,6 +70,7 @@ public class DocumentServiceImpl implements DocumentService {
             document.setTitle(title);
             document.setFilePath(fileUrl);
             document.setUploadedBy(user);
+            document.setProject(project);
             document.setUploadedAt(LocalDateTime.now());
 
             return documentRepository.save(document);
@@ -102,15 +104,16 @@ public class DocumentServiceImpl implements DocumentService {
 
 
     @Override
-    public Document updateDocument(Long id, String title, MultipartFile file) {
+    public Document updateDocument(Long id, String title, MultipartFile file,Project project) {
         Document document = getDocumentById(id);
         document.setTitle(title);
-
+        document.setProject(project);
         if (file != null && !file.isEmpty()) {
             try {
                 String contentType = file.getContentType();
-                String fileName = toSnakeCase(title);
-                String lastName = getExtension(file.getOriginalFilename());
+//                String fileName = toSnakeCase(title);
+//                String lastName = getExtension(file.getOriginalFilename());
+                String fileName = file.getOriginalFilename();
                 // Kiểm tra loại file hợp lệ
                 if (!"application/pdf".equals(contentType) &&
                         !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&
@@ -122,7 +125,7 @@ public class DocumentServiceImpl implements DocumentService {
                 // Upload file lên Cloudinary
                 Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
                         "resource_type", "raw", // Giữ nguyên file
-                        "public_id", "documents/" + fileName + "." + lastName,
+                        "public_id", "documents/" + fileName,
                         "use_filename", true,
                         "unique_filename", false
                 ));

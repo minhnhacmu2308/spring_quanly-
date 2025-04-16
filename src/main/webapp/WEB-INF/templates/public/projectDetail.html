@@ -59,7 +59,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="doc : ${documents}">
+            <tr th:each="doc : ${project.documents}">
                 <td th:text="${doc.title}"></td>
                 <td th:text="${doc.uploadedBy.fullName}"></td>
                 <td th:text="${#temporals.format(doc.uploadedAt, 'dd/MM/yyyy HH:mm')}"></td>
@@ -88,7 +88,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="risk : ${risks}">
+            <tr th:each="risk : ${project.risks}">
                 <td th:text="${risk.reportedBy.fullName}"></td>
                 <td th:text="${risk.information}"></td>
                 <td th:text="${risk.severity}"></td>
@@ -117,7 +117,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="process : ${processes}">
+            <tr th:each="process : ${project.processes}">
                 <td th:text="${process.reportedBy.fullName}"></td>
                 <td th:text="${process.description}"></td>
                 <td><a class="btn btn-sm btn-outline-info" th:href="@{${process.filePath}}" target="_blank">
@@ -142,7 +142,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="expense : ${expenses}">
+            <tr th:each="expense : ${project.expenses}">
                 <td th:text="${expense.reportedBy.fullName}"></td>
                 <td th:text="${#numbers.formatDecimal(expense.amount, 0, 'COMMA', 2, 'POINT')} + ' VND'"></td>
                 <td><a class="btn btn-sm btn-outline-warning" th:href="@{${expense.filePath}}" target="_blank">

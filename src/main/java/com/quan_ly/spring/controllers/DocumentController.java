@@ -2,8 +2,10 @@ package com.quan_ly.spring.controllers;
 
 import com.quan_ly.spring.constants.CommonConstant;
 import com.quan_ly.spring.exceptions.DocumentUploadException;
+import com.quan_ly.spring.models.Project;
 import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.services.DocumentService;
+import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,25 +30,30 @@ public class DocumentController {
     @Autowired
     DocumentService documentService;
     @Autowired
+    ProjectService projectService;
+    @Autowired
     UserService userService;
 
     @GetMapping({"/document"})
     public String listDocuments(Model model) {
         model.addAttribute("documents", documentService.getAllDocuments());
+        model.addAttribute("projects", projectService.getAllProjects());
         return "public/document";
     }
 
     @PostMapping("/document/add")
     public String addDocument(@RequestParam("file") MultipartFile file,
                               @RequestParam("title") String title,
+                              @RequestParam("projectId") String prId,
                               Principal principal,
                               RedirectAttributes redirectAttributes, HttpServletRequest request) {
         try {
             HttpSession session = request.getSession(false);
             User user = (User) session.getAttribute("user");
-
+            Long projectId = Long.parseLong(prId);
+            Project project = projectService.getProjectById(projectId).get();
             // Gọi service để lưu document
-            documentService.saveDocument(file, title, user);
+            documentService.saveDocument(file, title, user,project);
 
             // Thêm thông báo thành công
             redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
@@ -64,9 +71,12 @@ public class DocumentController {
     @PostMapping("/document/edit/{id}")
     public String updateDocument(@PathVariable Long id,
                                  @RequestParam("title") String title,
+                                 @RequestParam("projectId") String prId,
                                  @RequestParam(value = "file", required = false) MultipartFile file,
                                  RedirectAttributes redirectAttributes) {
-        documentService.updateDocument(id, title, file);
+        Long projectId = Long.parseLong(prId);
+        Project project = projectService.getProjectById(projectId).get();
+        documentService.updateDocument(id, title, file,project);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE, messageSource.getMessage("edit_success", null, Locale.getDefault()));
         return "redirect:/user/document";
     }
