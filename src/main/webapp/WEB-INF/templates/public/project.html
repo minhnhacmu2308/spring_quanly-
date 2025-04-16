@@ -173,9 +173,9 @@
                                             <div class="form-group">
                                                 <label>Status</label>
                                                 <select class="form-control" id="projectStatus" name="status" required>
-                                                    <option value="IN_PROGRESS" th:selected="${project.status == 'IN_PROGRESS'}">In Progress</option>
-                                                    <option value="COMPLETED" th:selected="${project.status == 'COMPLETED'}">Completed</option>
-                                                    <option value="ON_HOLD" th:selected="${project.status == 'ON_HOLD'}">On Hold</option>
+                                                    <option value="IN_PROGRESS" th:selected="${project.status.name() == 'IN_PROGRESS'}">In Progress</option>
+                                                    <option value="COMPLETED" th:selected="${project.status.name() == 'COMPLETED'}">Completed</option>
+                                                    <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
                                                 </select>
 
                                             </div>

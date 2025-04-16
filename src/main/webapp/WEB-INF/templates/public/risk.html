@@ -126,11 +126,9 @@
                             </a>
                         </td>
                         <td>
-                            <span th:if="${risk.status == 'NEW'}" >NEW</span>
-                            <span th:if="${risk.status == 'INPROGRESS'}" >INPROGRESS</span>
-                            <span th:if="${risk.status == 'RESOLVED'}" >RESOLVED</span>
-                            <span th:if="${risk.status != 'NEW' and risk.status != 'UNDER_REVIEW' and risk.status != 'RESOLVED'}"
-                                   th:text="${risk.status}">UNKNOWN</span>
+                            <span th:if="${risk.status.name() == 'NEW'}" >NEW</span>
+                            <span th:if="${risk.status.name() == 'INPROGRESS'}" >INPROGRESS</span>
+                            <span th:if="${risk.status.name() == 'RESOLVED'}" >RESOLVED</span>
                         </td>
 
 
@@ -163,35 +161,53 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/risk/edit/{id}(id=${risk.riskId})}" method="post" id="editProjectForm">
+                                        <form th:action="@{/risk/edit/{id}(id=${risk.riskId})}" method="post" id="editProjectForm" enctype="multipart/form-data">
                                             <input type="hidden" name="id" th:value="${risk.riskId}" />
                                             <div class="form-group">
-                                                <label for="editDescription">Description</label>
-                                                <textarea class="form-control" id="editDescription"
-                                                          th:text="${risk.information}" name="description" required></textarea>
+                                                <label for="projectId">Project</label>
+                                                <select class="form-control" name="projectId" required>
+                                                    <th:block th:each="project,index : ${projects}">
+                                                        <option th:if="${project.projectId == risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}" selected></option>
+                                                        <option th:if="${project.projectId != risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}"></option>
+                                                    </th:block>
+                                                </select>
                                             </div>
                                             <div class="form-group">
-                                                <label for="editDescription">Solution</label>
-                                                <textarea class="form-control" id="editSolution"
-                                                          th:text="${risk.filePath}" name="solution" required></textarea>
+                                                <label for="editDescription">Information</label>
+                                                <textarea class="form-control" id="editDescription"
+                                                          th:text="${risk.information}" name="information" required></textarea>
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
                                                 <select class="form-control" id="riskStatus" name="status" required>
-                                                    <option value="NEW" th:selected="${risk.status == 'NEW'}">New</option>
-                                                    <option value="UNDER_REVIEW" th:selected="${risk.status == 'UNDER_REVIEW'}">Under Review</option>
-                                                    <option value="RESOLVED" th:selected="${risk.status == 'RESOLVED'}">Resolved</option>
+                                                    <th:block th:if="${risk.status.name() == 'NEW'}">
+                                                        <option value="NEW" selected>New</option>
+                                                        <option value="INPROGRESS">In Progress</option>
+                                                        <option value="RESOLVED">Resolved</option>
+                                                    </th:block>
+
+                                                    <th:block th:if="${risk.status.name() == 'INPROGRESS'}">
+                                                        <option value="INPROGRESS" selected>In Progress</option>
+                                                        <option value="RESOLVED">Resolved</option>
+                                                    </th:block>
+
+                                                    <th:block th:if="${risk.status.name() == 'RESOLVED'}">
+                                                        <option value="RESOLVED" selected>Resolved</option>
+                                                    </th:block>
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label>Severity</label>
                                                 <select class="form-control" id="riskSeverity" name="severity" required>
-                                                    <option value="HIGH" th:selected="${risk.severity == 'HIGH'}">High</option>
-                                                    <option value="MEDIUM" th:selected="${risk.severity == 'MEDIUM'}">Medium</option>
-                                                    <option value="LOW" th:selected="${risk.severity == 'LOW'}">Low</option>
+                                                    <option value="HIGH" th:selected="${risk.severity.name() == 'HIGH'}">High</option>
+                                                    <option value="MEDIUM" th:selected="${risk.severity.name() == 'MEDIUM'}">Medium</option>
+                                                    <option value="LOW" th:selected="${risk.severity.name() == 'LOW'}">Low</option>
                                                 </select>
                                             </div>
-
+                                            <div class="form-group">
+                                                <label for="documentFile">Risk Detail</label>
+                                                <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt">
+                                            </div>
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
                                         </form>
                                     </div>

@@ -107,6 +107,8 @@ public class RiskController {
     @PostMapping("/edit/{id}")
     public String updateRisk(@PathVariable Long id,
                              @ModelAttribute("risk") Risk updatedRisk,
+                             @RequestParam("projectId") String prId,
+                             @RequestParam(value = "file", required = false) MultipartFile file,
                              RedirectAttributes redirectAttributes, HttpSession session) {
 
         Optional<Risk> optionalRisk = riskService.getRiskById(id);
@@ -116,6 +118,40 @@ public class RiskController {
             return "redirect:/risk/home";
         }
         User user = (User) session.getAttribute("user");
+        Long projectId = Long.parseLong(prId);
+        Project project = projectService.getProjectById(projectId).get();
+        String filePath = optionalRisk.get().getFilePath();
+        //xu ly file
+        if (file != null && !file.isEmpty()) {
+            try {
+                String contentType = file.getContentType();
+                String fileName = file.getOriginalFilename();
+                // Kiểm tra loại file hợp lệ
+                if (!"application/pdf".equals(contentType) &&
+                        !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&
+                        !"text/plain".equals(contentType) &&
+                        !"application/zip".equals(contentType)) {
+                    throw new DocumentUploadException("Only PDF, DOCX, TXT files are accepted.");
+                }
+                // Upload file lên Cloudinary
+                Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
+                        "resource_type", "raw", // Giữ nguyên file
+                        "public_id", "documents/" + fileName,
+                        "use_filename", true,
+                        "unique_filename", false
+                ));
+                System.out.println(uploadResult);
+
+                filePath = uploadResult.get("secure_url").toString();
+
+            } catch (IOException e) {
+                throw new DocumentUploadException("Upload failed");
+            }
+        }
+
+        //
+        updatedRisk.setFilePath(filePath);
+        updatedRisk.setProject(project);
         updatedRisk.setReportedBy(user);
         updatedRisk.setUpdatedAt(LocalDateTime.now());
         riskService.updateRisk(id, updatedRisk);
