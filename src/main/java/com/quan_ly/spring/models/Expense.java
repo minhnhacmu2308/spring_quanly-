@@ -22,12 +22,16 @@ public class Expense {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @ManyToOne
+    @JoinColumn(name = "reported_by", nullable = false)
+    private User reportedBy;
+
     @Column(nullable = false)
     private BigDecimal amount;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+    private String filePath;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime reportDate = LocalDateTime.now();
 }

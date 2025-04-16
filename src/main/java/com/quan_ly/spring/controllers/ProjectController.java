@@ -29,6 +29,12 @@ public class ProjectController {
         return "public/project";
     }
 
+    @GetMapping({"/detail/{id}"})
+    public String detail(@PathVariable Long id,Model model) {
+        model.addAttribute("project", projectService.getProjectById(id).get());
+        return "public/projectDetail";
+    }
+
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("project", new Project());

@@ -38,7 +38,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project updateProject(Long id, Project updatedProject) {
         return projectRepository.findById(id).map(project -> {
             project.setProjectName(updatedProject.getProjectName());
-            project.setLocation(updatedProject.getLocation());
+            project.setBudget(updatedProject.getBudget());
             project.setStartDate(updatedProject.getStartDate());
             project.setEndDate(updatedProject.getEndDate());
             project.setStatus(updatedProject.getStatus());

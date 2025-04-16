@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="public/fragments :: html_head">
+</head>
+<body>
+<header th:replace="public/fragments ::html_header"></header>
+
+<main id="content" role="main" class="main pointer-event">
+    <div class="content container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-end">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <h1 class="page-header-title">Project Detail</h1>
+                </div>
+            </div>
+            <!-- End Row -->
+        </div>
+    <!-- Section 1: Project Details -->
+    <section class="mb-5">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-5">Project Name:</dt>
+                    <dd class="col-sm-7" th:text="${project.projectName}"></dd>
+
+                    <dt class="col-sm-5">Budget:</dt>
+                    <dd class="col-sm-7" th:text="${#numbers.formatDecimal(project.budget, 0, 'COMMA', 2, 'POINT')} + ' VND'"></dd>
+
+                    <dt class="col-sm-5">Start Date:</dt>
+                    <dd class="col-sm-7" th:text="${project.startDate}"></dd>
+
+                    <dt class="col-sm-5">End Date:</dt>
+                    <dd class="col-sm-7" th:text="${project.endDate}"></dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-5">Status:</dt>
+                    <dd class="col-sm-7" th:text="${project.status}"></dd>
+
+                    <dt class="col-sm-5">Project Manager:</dt>
+                    <dd class="col-sm-7" th:text="${project.manager.fullName}"></dd>
+                </dl>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Documents -->
+    <section class="mb-5">
+        <h2 class="mb-4"><i class="bi bi-file-earmark-text me-2 text-success"></i>Project Documents</h2>
+        <table class="table table-hover align-middle">
+            <thead class="table-success">
+            <tr>
+                <th>Title</th>
+                <th>Uploader</th>
+                <th>Upload Time</th>
+                <th>File</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="doc : ${documents}">
+                <td th:text="${doc.title}"></td>
+                <td th:text="${doc.uploadedBy.fullName}"></td>
+                <td th:text="${#temporals.format(doc.uploadedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td><a class="btn btn-sm btn-outline-primary" th:href="@{${doc.filePath}}" target="_blank">
+                    <i class="bi bi-box-arrow-up-right"></i> View
+                </a></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Section 3: Risk Reports -->
+    <section class="mb-5">
+        <h2 class="mb-4"><i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>Risk Reports</h2>
+        <table class="table table-hover align-middle">
+            <thead class="table-danger">
+            <tr>
+                <th>Reporter</th>
+                <th>Information</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Approval</th>
+                <th>Reported At</th>
+                <th>Last Updated</th>
+                <th>File</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="risk : ${risks}">
+                <td th:text="${risk.reportedBy.fullName}"></td>
+                <td th:text="${risk.information}"></td>
+                <td th:text="${risk.severity}"></td>
+                <td th:text="${risk.status}"></td>
+                <td th:text="${risk.approveStatus}"></td>
+                <td th:text="${#temporals.format(risk.reportedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${#temporals.format(risk.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td><a class="btn btn-sm btn-outline-danger" th:href="@{${risk.filePath}}" target="_blank">
+                    <i class="bi bi-eye-fill"></i> View
+                </a></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Section 4: Progress Reports -->
+    <section class="mb-5">
+        <h2 class="mb-4"><i class="bi bi-graph-up-arrow me-2 text-info"></i>Progress Reports</h2>
+        <table class="table table-hover align-middle">
+            <thead class="table-info">
+            <tr>
+                <th>Reporter</th>
+                <th>Description</th>
+                <th>File</th>
+                <th>Reported At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="process : ${processes}">
+                <td th:text="${process.reportedBy.fullName}"></td>
+                <td th:text="${process.description}"></td>
+                <td><a class="btn btn-sm btn-outline-info" th:href="@{${process.filePath}}" target="_blank">
+                    <i class="bi bi-download"></i> View
+                </a></td>
+                <td th:text="${#temporals.format(process.reportDate, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Section 5: Expense Reports -->
+    <section>
+        <h2 class="mb-4"><i class="bi bi-cash-coin me-2 text-warning"></i>Expense Reports</h2>
+        <table class="table table-hover align-middle">
+            <thead class="table-warning">
+            <tr>
+                <th>Reporter</th>
+                <th>Amount</th>
+                <th>File</th>
+                <th>Reported At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="expense : ${expenses}">
+                <td th:text="${expense.reportedBy.fullName}"></td>
+                <td th:text="${#numbers.formatDecimal(expense.amount, 0, 'COMMA', 2, 'POINT')} + ' VND'"></td>
+                <td><a class="btn btn-sm btn-outline-warning" th:href="@{${expense.filePath}}" target="_blank">
+                    <i class="bi bi-receipt"></i> View
+                </a></td>
+                <td th:text="${#temporals.format(expense.reportDate, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+    </div>
+</main>
+
+<script th:src="@{/public/assets/js/demo.js}"></script>
+</body>
+</html>

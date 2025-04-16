@@ -1,6 +1,9 @@
 package com.quan_ly.spring.controllers;
 
+import com.cloudinary.Cloudinary;
 import com.quan_ly.spring.constants.CommonConstant;
+import com.quan_ly.spring.exceptions.DocumentUploadException;
+import com.quan_ly.spring.models.Document;
 import com.quan_ly.spring.models.Project;
 import com.quan_ly.spring.models.Risk;
 import com.quan_ly.spring.models.User;
@@ -13,10 +16,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -31,6 +37,9 @@ public class RiskController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    Cloudinary cloudinary;
 
     @GetMapping("/home")
     public String listRisks(Model model) {
@@ -48,18 +57,43 @@ public class RiskController {
     @PostMapping("/create")
     public String createRisk(@ModelAttribute("risk") Risk risk,
                              RedirectAttributes redirectAttributes,
-                             HttpSession session, HttpServletRequest request) {
+                             HttpSession session, HttpServletRequest request,@RequestParam("file") MultipartFile file) {
+        // Xử lý file
+        try {
+            String fileName = file.getOriginalFilename();
+            // Cho phép các định dạng file: PDF, DOCX, TXT, ZIP
+            String contentType = file.getContentType();
+            if (!"application/pdf".equals(contentType) &&
+                    !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&
+                    !"text/plain".equals(contentType) &&
+                    !"application/zip".equals(contentType)) {
+                throw new DocumentUploadException("Only PDF, DOCX, TXT files are accepted.");
+            }
 
-        User user = (User) session.getAttribute("user");
-        risk.setReportedBy(user);
-        risk.setReportedAt(LocalDateTime.now());
-        risk.setUpdatedAt(LocalDateTime.now());
-        Long projectId = Long.parseLong(request.getParameter("projectId"));
-        risk.setProject(projectService.getProjectById(projectId).get());
-        riskService.createRisk(risk);
-        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
-                messageSource.getMessage("create_success", null, Locale.getDefault()));
-        return "redirect:/risk/home";
+            // Upload file lên Cloudinary với resource_type là "raw"
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
+                    "resource_type", "raw",  // Giữ nguyên định dạng file
+                    "public_id", "documents/" + fileName,
+                    "use_filename", true,
+                    "unique_filename", false
+            ));
+
+            String fileUrl = uploadResult.get("secure_url").toString();
+            User user = (User) session.getAttribute("user");
+            risk.setFilePath(fileUrl);
+            risk.setReportedBy(user);
+            risk.setReportedAt(LocalDateTime.now());
+            risk.setUpdatedAt(LocalDateTime.now());
+            Long projectId = Long.parseLong(request.getParameter("projectId"));
+            risk.setProject(projectService.getProjectById(projectId).get());
+            riskService.createRisk(risk);
+            redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                    messageSource.getMessage("create_success", null, Locale.getDefault()));
+            return "redirect:/risk/home";
+        } catch (IOException e) {
+            throw new DocumentUploadException("Upload failed");
+        }
+        //end
     }
 
     @GetMapping("/edit/{id}")

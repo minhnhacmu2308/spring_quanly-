@@ -1,5 +1,6 @@
 package com.quan_ly.spring.models;
 
+import com.quan_ly.spring.enums.ApproveStatus;
 import com.quan_ly.spring.enums.RiskStatus;
 import com.quan_ly.spring.enums.Severity;
 import jakarta.persistence.*;
@@ -28,7 +29,7 @@ public class Risk {
     private User reportedBy;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+    private String information;
 
     @Enumerated(EnumType.STRING)
     private RiskStatus status = RiskStatus.NEW; // NEW, UNDER_REVIEW, RESOLVED
@@ -36,10 +37,13 @@ public class Risk {
     @Enumerated(EnumType.STRING)
     private Severity severity; // LOW, MEDIUM, HIGH
 
+    @Enumerated(EnumType.STRING)
+    private ApproveStatus approveStatus = ApproveStatus.UNDER_REVIEW;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime reportedAt = LocalDateTime.now();
 
-    private String solution;
+    private String filePath;
 
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -22,7 +23,7 @@ public class Project {
     private String projectName;
 
     @Column(nullable = false)
-    private String location;
+    private BigDecimal budget;
 
     @Column(nullable = false)
     private LocalDate startDate;

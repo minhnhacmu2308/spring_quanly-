@@ -5,33 +5,33 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "documents")
-public class Document {
+@Table(name = "process")
+public class Process {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long documentId;
+    private Long processId;
 
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @Column(nullable = false)
-    private String title;
+    @ManyToOne
+    @JoinColumn(name = "reported_by", nullable = false)
+    private User reportedBy;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String filePath;
 
-    @ManyToOne
-    @JoinColumn(name = "uploaded_by", nullable = false)
-    private User uploadedBy;
-
     @Column(nullable = false, updatable = false)
-    private LocalDateTime uploadedAt = LocalDateTime.now();
+    private LocalDateTime reportDate = LocalDateTime.now();
 }
-

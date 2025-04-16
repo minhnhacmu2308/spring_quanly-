@@ -103,21 +103,15 @@
                     <thead class="thead-light">
                     <tr>
                         <th>Project Name</th>
-                        <th>Location</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
                         <th>Status</th>
                         <th>Manager</th>
+                        <th>Budget</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="project, iterStat : ${projects}">
                         <td th:text="${project.projectName}">Project Name</td>
-                        <td th:text="${project.location}">Location</td>
-                        <td th:text="${project.startDate}">Start Date</td>
-                        <td th:text="${project.endDate}">End Date</td>
-
                         <td>
         <span class="legend-indicator"
               th:classappend="'bg-' + (${project.status} == 'IN_PROGRESS' ? 'warning' : (${project.status} == 'COMPLETED' ? 'success' : 'secondary'))">
@@ -133,8 +127,12 @@
                                           th:text="${project.manager != null ? project.manager.email : ''}">Manager Email</span>
                                 </div>
                         </td>
-
+                        <td th:text="${project.budget}">Project Name</td>
                         <td>
+                            <a class="btn btn-sm btn-info" th:href="@{'/project/detail/' + ${project.projectId}}">
+                                <i class="tio-visible"></i> Detail
+                            </a>
+
                             <a class="btn btn-sm btn-success" href="javascript:;"
                                th:attr="data-toggle='modal', data-target='#editProjectModal' + ${project.projectId}">
                                 <i class="tio-edit"></i> Edit
@@ -144,6 +142,7 @@
                                 <i class="tio-delete"></i> Delete
                             </button>
                         </td>
+
                         <!-- Modal Chỉnh Sửa -->
                         <div class="modal fade" th:id="'editProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
                             <div class="modal-dialog" role="document">
@@ -160,8 +159,8 @@
                                                 <input type="text" class="form-control" th:value="${project.projectName}" name="projectName">
                                             </div>
                                             <div class="form-group">
-                                                <label>Location</label>
-                                                <input type="text" class="form-control" th:value="${project.location}" name="location">
+                                                <label>Budget</label>
+                                                <input type="text" class="form-control" th:value="${project.budget}" name="budget">
                                             </div>
                                             <div class="form-group">
                                                 <label>Start Date</label>
@@ -275,8 +274,8 @@
                             <input type="text" class="form-control" id="projectName" name="projectName" required>
                         </div>
                         <div class="form-group">
-                            <label for="location">Location</label>
-                            <input type="text" class="form-control" id="location" name="location" required>
+                            <label for="budget">Budget</label>
+                            <input type="text" class="form-control" id="budget" name="budget" required>
                         </div>
                         <div class="form-group">
                             <label for="startDate">Start Date</label>

@@ -102,28 +102,32 @@
        }'>
                     <thead class="thead-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Project</th>
+                        <th>Reported Date</th>
                         <th>Reported By</th>
-                        <th>Description</th>
+                        <th>Project</th>
+                        <th>Information</th>
+                        <th>Detail</th>
                         <th>Status</th>
                         <th>Severity</th>
-                        <th>Reported At</th>
-                        <th>Solution</th>
+                        <th>Approve Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
 
                     <tr th:each="risk, iterStat : ${risks}">
-                        <td th:text="${risk.riskId}">1</td>
-                        <td th:text="${risk.project.projectName}">Project Name</td>
+                        <td th:text="${#temporals.format(risk.reportedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
                         <td th:text="${risk.reportedBy.fullName}">John Doe</td>
-                        <td th:text="${risk.description}">Risk description</td>
-
+                        <td th:text="${risk.project.projectName}">Project Name</td>
+                        <td th:text="${risk.information}">Risk description</td>
+                        <td>
+                            <a th:href="${risk.filePath}" download
+                               th:text="${#strings.substring(risk.filePath, risk.filePath.lastIndexOf('/') + 1)}">
+                            </a>
+                        </td>
                         <td>
                             <span th:if="${risk.status == 'NEW'}" >NEW</span>
-                            <span th:if="${risk.status == 'UNDER_REVIEW'}" >UNDER REVIEW</span>
+                            <span th:if="${risk.status == 'INPROGRESS'}" >INPROGRESS</span>
                             <span th:if="${risk.status == 'RESOLVED'}" >RESOLVED</span>
                             <span th:if="${risk.status != 'NEW' and risk.status != 'UNDER_REVIEW' and risk.status != 'RESOLVED'}"
                                    th:text="${risk.status}">UNKNOWN</span>
@@ -137,11 +141,7 @@
                             <span th:if="${risk.severity != 'HIGH' and risk.severity != 'MEDIUM' and risk.severity != 'LOW'}"
                                    th:text="${risk.severity}">UNKNOWN</span>
                         </td>
-
-
-                        <td th:text="${risk.reportedAt}">2025-03-30</td>
-                        <td th:text="${risk.solution}">Solution here</td>
-
+                        <td th:text="${risk.approveStatus}">Risk description</td>
                         <td>
                             <a class="btn btn-sm btn-success" href="javascript:;"
                                th:attr="data-toggle='modal', data-target='#editRiskModal' + ${risk.riskId}">
@@ -168,12 +168,12 @@
                                             <div class="form-group">
                                                 <label for="editDescription">Description</label>
                                                 <textarea class="form-control" id="editDescription"
-                                                          th:text="${risk.description}" name="description" required></textarea>
+                                                          th:text="${risk.information}" name="description" required></textarea>
                                             </div>
                                             <div class="form-group">
                                                 <label for="editDescription">Solution</label>
                                                 <textarea class="form-control" id="editSolution"
-                                                          th:text="${risk.solution}" name="solution" required></textarea>
+                                                          th:text="${risk.filePath}" name="solution" required></textarea>
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
@@ -281,7 +281,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form th:action="@{/risk/create}" method="post" >
+                    <form th:action="@{/risk/create}" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="projectId">Project</label>
                             <select class="form-control" name="projectId" required>
@@ -292,14 +292,14 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="description">Description</label>
-                            <textarea class="form-control" id="description" name="description" required></textarea>
+                            <label for="description">Information</label>
+                            <textarea class="form-control" id="description" name="information" required></textarea>
                         </div>
                         <div class="form-group">
                             <label for="status">Status</label>
                             <select class="form-control" id="status" name="status" required>
                                 <option value="NEW">New</option>
-                                <option value="UNDER_REVIEW">Under Review</option>
+                                <option value="INPROGRESS">Inprogress</option>
                                 <option value="RESOLVED">Resolved</option>
                             </select>
                         </div>
@@ -312,8 +312,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="solution">Solution</label>
-                            <textarea class="form-control" name="solution" id="solution"></textarea>
+                            <label for="documentFile">Risk Detail</label>
+                            <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>

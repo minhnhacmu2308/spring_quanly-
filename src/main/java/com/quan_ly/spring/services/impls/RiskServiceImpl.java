@@ -36,10 +36,9 @@ public class RiskServiceImpl implements RiskService {
         return riskRepository.findById(id).map(risk -> {
 //            risk.setProject(updatedRisk.getProject());
             risk.setReportedBy(updatedRisk.getReportedBy());
-            risk.setDescription(updatedRisk.getDescription());
+            risk.setInformation(updatedRisk.getInformation());
             risk.setStatus(updatedRisk.getStatus());
             risk.setSeverity(updatedRisk.getSeverity());
-            risk.setSolution(updatedRisk.getSolution());
             risk.setUpdatedAt(updatedRisk.getUpdatedAt());
             return riskRepository.save(risk);
         }).orElseThrow(() -> new RuntimeException("Risk not found with ID: " + id));
