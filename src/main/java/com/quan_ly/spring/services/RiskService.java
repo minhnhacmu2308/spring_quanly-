@@ -12,4 +12,6 @@ public interface RiskService {
     Risk createRisk(Risk risk);
     Risk updateRisk(Long id, Risk risk);
     void deleteRisk(Long id);
+    void appRisk(Long id);
+    Risk updateStatusRisk(Long id, Risk risk);
 }

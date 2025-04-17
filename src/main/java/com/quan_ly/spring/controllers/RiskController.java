@@ -167,4 +167,32 @@ public class RiskController {
                 messageSource.getMessage("delete_success", null, Locale.getDefault()));
         return "redirect:/risk/home";
     }
+
+    @GetMapping("/approve/{id}")
+    public String appRisk(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        riskService.appRisk(id);
+        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                messageSource.getMessage("delete_success", null, Locale.getDefault()));
+        return "redirect:/risk/home";
+    }
+
+    @PostMapping("/upp/{id}")
+    public String uppRisk(@PathVariable Long id,
+                             @ModelAttribute("risk") Risk updatedRisk,
+                             RedirectAttributes redirectAttributes, HttpSession session) {
+
+        Optional<Risk> optionalRisk = riskService.getRiskById(id);
+        if (optionalRisk.isEmpty()) {
+            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
+                    messageSource.getMessage("risk_not_found", null, Locale.getDefault()));
+            return "redirect:/risk/home";
+        }
+        User user = (User) session.getAttribute("user");
+        updatedRisk.setReportedBy(user);
+        updatedRisk.setUpdatedAt(LocalDateTime.now());
+        riskService.updateStatusRisk(id, updatedRisk);
+        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                messageSource.getMessage("edit_success", null, Locale.getDefault()));
+        return "redirect:/risk/home";
+    }
 }

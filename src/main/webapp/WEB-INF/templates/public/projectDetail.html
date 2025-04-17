@@ -41,6 +41,13 @@
 
                     <dt class="col-sm-5">Project Manager:</dt>
                     <dd class="col-sm-7" th:text="${project.manager.fullName}"></dd>
+
+                    <dt class="col-sm-5">Total Costs:</dt>
+                    <dd class="col-sm-7" th:text="${#numbers.formatDecimal(totalCost, 1, 'COMMA', 2, 'POINT')} + ' ₫'"></dd>
+
+                    <dt class="col-sm-5">Remaining Budget:</dt>
+                    <dd class="col-sm-7" th:text="${#numbers.formatDecimal(remainingBudget, 1, 'COMMA', 2, 'POINT')} + ' ₫'"></dd>
+
                 </dl>
             </div>
         </div>

@@ -1,5 +1,6 @@
 package com.quan_ly.spring.services.impls;
 
+import com.quan_ly.spring.enums.ApproveStatus;
 import com.quan_ly.spring.models.Risk;
 import com.quan_ly.spring.repositories.RiskRepository;
 import com.quan_ly.spring.services.RiskService;
@@ -46,7 +47,25 @@ public class RiskServiceImpl implements RiskService {
     }
 
     @Override
+    public Risk updateStatusRisk(Long id, Risk updatedRisk) {
+        return riskRepository.findById(id).map(risk -> {
+            risk.setReportedBy(updatedRisk.getReportedBy());
+            risk.setStatus(updatedRisk.getStatus());
+            risk.setUpdatedAt(updatedRisk.getUpdatedAt());
+            return riskRepository.save(risk);
+        }).orElseThrow(() -> new RuntimeException("Risk not found with ID: " + id));
+    }
+
+    @Override
     public void deleteRisk(Long id) {
         riskRepository.deleteById(id);
+    }
+
+    @Override
+    public void appRisk(Long id) {
+        riskRepository.findById(id).map(risk -> {
+            risk.setApproveStatus(ApproveStatus.APPROVED);
+            return riskRepository.save(risk);
+        }).orElseThrow(() -> new RuntimeException("Risk not found with ID: " + id));
     }
 }

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Title -->
-    <title>Dashboard | Front - Admin &amp; Dashboard Template</title>
+    <title>System</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="favicon.ico">
@@ -796,13 +796,13 @@
 
                                     <div class="dropdown-divider"></div>
 
-                                    <a class="dropdown-item" href="#">
-                        <span
-                                class="text-truncate pr-2"
-                                title="Profile &amp; account"
-                        >Profile &amp; account</span
-                        >
-                                    </a>
+<!--                                    <a class="dropdown-item" href="#">-->
+<!--                        <span-->
+<!--                                class="text-truncate pr-2"-->
+<!--                                title="Profile &amp; account"-->
+<!--                        >Profile &amp; account</span-->
+<!--                        >-->
+<!--                                    </a>-->
                                     <a class="dropdown-item" href="/auth/logout">
                         <span class="text-truncate pr-2" title="Sign out"
                         >Sign out</span
@@ -913,7 +913,7 @@
                             </li>
 
                             <!-- Pages -->
-                            <li class="nav-item">
+                            <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER'}">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
                                         href="/project/home"
@@ -930,7 +930,7 @@
                             <!-- End Pages -->
 
                             <!-- Apps -->
-                            <li class="nav-item">
+                            <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER' || session.user.role.name() == 'FIELD_STAFF'}">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
                                         href="/risk/home"
@@ -938,14 +938,46 @@
                                         data-placement="left"
                                 >
                                     <i class="tio-apps nav-icon"></i>
-                                    <span
+                                    <span th:if="${session.user.role.name() == 'MANAGER'}"
                                             class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
                                     >Risks Management
                       </span>
+                                    <span th:if="${session.user.role.name() == 'FIELD_STAFF'}"
+                                          class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
+                                    >Report Risks
+                      </span>
+                                </a>
+                            </li>
+
+                            <!-- Apps -->
+                            <li class="nav-item" th:if="${session.user.role.name() == 'ACCOUNTANT'}">
+                                <a
+                                        class="js-nav-tooltip-link nav-link"
+                                        href="/expense/home"
+                                        title="Report expense"
+                                        data-placement="left"
+                                >
+                                    <i class="tio-money nav-icon"></i>
+                                    <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
+                                    >Report Expense
+                                    </span>
                                 </a>
                             </li>
                             <!-- End Apps -->
+                            <li class="nav-item" th:if="${session.user.role.name() == 'PLANNER'}">
+                                <a
+                                        class="js-nav-tooltip-link nav-link"
+                                        href="/process/home"
+                                        title="Report process"
+                                        data-placement="left"
+                                >
 
+                                    <i class="tio-chart-bar-4 nav-icon"></i>
+                                    <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
+                                    >Report Process
+                                    </span>
+                                </a>
+                            </li>
                             <!-- Authentication -->
                             <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER'}">
                                 <a
@@ -973,7 +1005,10 @@
                                     <i class="tio-book-opened nav-icon"></i>
                                     <span
                                             class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
-                                    >Documents Management</span
+                                    >
+                                        <span th:if="${session.user.role.name() == 'MANAGER'}">Documents Management</span>
+    <span th:unless="${session.user.role.name() == 'MANAGER'}">Look Up Documents</span>
+                                    </span
                                     >
                                 </a>
                             </li>

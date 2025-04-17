@@ -12,7 +12,10 @@
         <div class="page-header">
             <div class="row align-items-end">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title">Documents Management</h1>
+                    <h1 class="page-header-title">
+                        <span th:if="${session.user.role.name() == 'MANAGER'}">Documents Management</span>
+                        <span th:unless="${session.user.role.name() == 'MANAGER'}">Look Up Documents</span>
+                    </h1>
                 </div>
 
                 <div  class="col-sm-auto" th:if="${session.user.role.name() == 'MANAGER'}">

@@ -2,6 +2,7 @@ package com.quan_ly.spring.controllers;
 
 import com.quan_ly.spring.constants.CommonConstant;
 import com.quan_ly.spring.models.Project;
+import com.quan_ly.spring.models.Expense;
 import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.services.ProjectService;
 import jakarta.servlet.http.HttpSession;
@@ -12,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -32,6 +34,14 @@ public class ProjectController {
     @GetMapping({"/detail/{id}"})
     public String detail(@PathVariable Long id,Model model) {
         Project project = projectService.getProjectById(id).get();
+        BigDecimal totalCost = project.getExpenses().stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal remainingBudget = project.getBudget().subtract(totalCost);
+
+        model.addAttribute("totalCost", totalCost);
+        model.addAttribute("remainingBudget", remainingBudget);
         model.addAttribute("project", projectService.getProjectById(id).get());
         return "public/projectDetail";
     }
@@ -79,8 +89,30 @@ public class ProjectController {
 
     @GetMapping("/delete/{id}")
     public String deleteProject(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        projectService.deleteProject(id);
-        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE, messageSource.getMessage("delete_success", null, Locale.getDefault()));
+        Optional<Project> optionalProject = projectService.getProjectById(id);
+
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+
+            boolean hasChildren =
+                    project.getDocuments() != null && !project.getDocuments().isEmpty() ||
+                            project.getRisks() != null && !project.getRisks().isEmpty() ||
+                            project.getProcesses() != null && !project.getProcesses().isEmpty() ||
+                            project.getExpenses() != null && !project.getExpenses().isEmpty();
+
+            if (hasChildren) {
+                redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
+                        "This project cannot be deleted because it has related documents, risks, processes, or expenses.");
+            } else {
+                projectService.deleteProject(id);
+                redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                        messageSource.getMessage("delete_success", null, Locale.getDefault()));
+            }
+        } else {
+            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE, "Project not found!");
+        }
+
         return "redirect:/project/home";
     }
+
 }

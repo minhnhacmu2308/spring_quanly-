@@ -3,6 +3,7 @@
 <head th:replace="public/fragments :: html_head">
 </head>
 <body>
+<th:block th:replace="public/fragments :: html_toast"></th:block>
 <th:block th:replace="public/fragments :: html_header"></th:block>
 
 <main id="content" role="main" class="main pointer-event">
@@ -85,10 +86,6 @@
             <div class="table-responsive datatable-custom">
                 <table id="datatable" class="table table-lg table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
                        data-hs-datatables-options='{
-         "columnDefs": [{
-            "targets": [6],
-            "orderable": false
-          }],
          "order": [],
          "info": {
            "totalQty": "#datatableWithPaginationInfoTotalQty"
