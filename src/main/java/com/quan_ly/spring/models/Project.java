@@ -38,6 +38,18 @@ public class Project {
     @JoinColumn(name = "manager_id")
     private User manager;
 
+    @ManyToOne
+    @JoinColumn(name = "field_staff_id")
+    private User fieldStaff;
+
+    @ManyToOne
+    @JoinColumn(name = "planner_id")
+    private User planner;
+
+    @ManyToOne
+    @JoinColumn(name = "accountant_id")
+    private User accountant;
+
     @OneToMany(mappedBy = "project")
     private List<Document> documents;
 

@@ -102,6 +102,9 @@
                         <th>Project Name</th>
                         <th>Status</th>
                         <th>Manager</th>
+                        <th>Field Staff</th>
+                        <th>Planner</th>
+                        <th>Accountant</th>
                         <th>Budget</th>
                         <th>Actions</th>
                     </tr>
@@ -124,6 +127,30 @@
                                           th:text="${project.manager != null ? project.manager.email : ''}">Manager Email</span>
                                 </div>
                         </td>
+                        <td>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.fieldStaff != null ? project.fieldStaff.fullName : 'N/A'}">FieldStaff Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.fieldStaff != null ? project.fieldStaff.email : ''}">FieldStaff Email</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.planner != null ? project.planner.fullName : 'N/A'}">Planner Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.planner != null ? project.planner.email : ''}">Planner Email</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.accountant != null ? project.accountant.fullName : 'N/A'}">Accountant Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.accountant != null ? project.accountant.email : ''}">Accountant Email</span>
+                            </div>
+                        </td>
                         <td th:text="${project.budget}">Project Name</td>
                         <td>
                             <a class="btn btn-sm btn-info" th:href="@{'/project/detail/' + ${project.projectId}}">
@@ -141,6 +168,7 @@
                         </td>
 
                         <!-- Modal Chỉnh Sửa -->
+                        <!-- Modal Chỉnh Sửa -->
                         <div class="modal fade" th:id="'editProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
@@ -151,37 +179,77 @@
                                     <div class="modal-body">
                                         <form th:action="@{/project/edit/{id}(id=${project.projectId})}" method="post" id="editProjectForm">
                                             <input type="hidden" name="id" th:value="${project.projectId}" />
+
                                             <div class="form-group">
                                                 <label>Project Name</label>
                                                 <input type="text" class="form-control" th:value="${project.projectName}" name="projectName">
                                             </div>
+
                                             <div class="form-group">
                                                 <label>Budget</label>
                                                 <input type="text" class="form-control" th:value="${project.budget}" name="budget">
                                             </div>
+
                                             <div class="form-group">
                                                 <label>Start Date</label>
                                                 <input type="date" class="form-control" th:value="${project.startDate}" name="startDate">
                                             </div>
+
                                             <div class="form-group">
                                                 <label>End Date</label>
                                                 <input type="date" class="form-control" th:value="${project.endDate}" name="endDate">
                                             </div>
+
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <select class="form-control" id="projectStatus" name="status" required>
+                                                <select class="form-control" name="status" required>
                                                     <option value="IN_PROGRESS" th:selected="${project.status.name() == 'IN_PROGRESS'}">In Progress</option>
                                                     <option value="COMPLETED" th:selected="${project.status.name() == 'COMPLETED'}">Completed</option>
                                                     <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
                                                 </select>
-
                                             </div>
+
+                                            <!-- THÊM 3 dropdown chọn User -->
+                                            <div class="form-group">
+                                                <label>Planner</label>
+                                                <select class="form-control" name="planner_id" required>
+                                                    <option th:each="user : ${planners}"
+                                                            th:value="${user.userId}"
+                                                            th:text="${user.fullName}"
+                                                            th:selected="${user.userId == project.planner.userId}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Field Staff</label>
+                                                <select class="form-control" name="field_staff_id" required>
+                                                    <option th:each="user : ${fieldStaffs}"
+                                                            th:value="${user.userId}"
+                                                            th:text="${user.fullName}"
+                                                            th:selected="${user.userId == project.fieldStaff.userId}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Accountant</label>
+                                                <select class="form-control" name="accountant_id" required>
+                                                    <option th:each="user : ${accountants}"
+                                                            th:value="${user.userId}"
+                                                            th:text="${user.fullName}"
+                                                            th:selected="${user.userId == project.accountant.userId}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
                                             <button type="submit" class="btn btn-success">Save Changes</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <!-- Modal Xóa -->
                         <div class="modal fade" id="deleteProjectModal" th:id="'deleteProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
                             <div class="modal-dialog" role="document">
@@ -265,10 +333,39 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form th:action="@{/project/create}" method="post" >
+                    <form th:action="@{/project/create}" method="post" id="projectForm" >
                         <div class="form-group">
                             <label for="projectName">Project Name</label>
                             <input type="text" class="form-control" id="projectName" name="projectName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fieldStaffId">Field Staff</label>
+                            <select class="form-control" id="fieldStaffId" name="field_staff_id" required>
+                                <th:block th:each="user,index : ${fieldStaffs}">
+                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                </th:block>
+                            </select>
+                            <small class="text-danger" id="fieldStaffError"></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="plannerId">Planner</label>
+                            <select class="form-control" id="plannerId" name="planner_id" required>
+                                <th:block th:each="user,index : ${planners}">
+                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                </th:block>
+                            </select>
+                            <small class="text-danger" id="plannerError"></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="accountantId">Accountant</label>
+                            <select class="form-control" id="accountantId" name="accountant_id" required>
+                                <th:block th:each="user,index : ${accountants}">
+                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                </th:block>
+                            </select>
+                            <small class="text-danger" id="accountantError"></small>
                         </div>
                         <div class="form-group">
                             <label for="budget">Budget</label>
@@ -277,11 +374,14 @@
                         <div class="form-group">
                             <label for="startDate">Start Date</label>
                             <input type="date" class="form-control" id="startDate" name="startDate" required>
+                            <div id="startDateError" class="text-danger small"></div>
                         </div>
                         <div class="form-group">
                             <label for="endDate">End Date</label>
                             <input type="date" class="form-control" id="endDate" name="endDate" required>
+                            <div id="endDateError" class="text-danger small"></div>
                         </div>
+
                         <div class="form-group">
                             <label for="projectStatus">Status</label>
                             <select class="form-control" id="projectStatus" name="status" required>
@@ -298,5 +398,59 @@
     </div>
 </main>
 <script th:src="@{/public/assets/js/demo.js}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('projectForm');
+
+    form.addEventListener('submit', function(e) {
+        const fieldStaff = document.getElementById('fieldStaffId').value;
+        const planner = document.getElementById('plannerId').value;
+        const accountant = document.getElementById('accountantId').value;
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        let isValid = true;
+
+        // Clear previous messages
+        document.getElementById('fieldStaffError').innerText = '';
+        document.getElementById('plannerError').innerText = '';
+        document.getElementById('accountantError').innerText = '';
+        document.getElementById('startDateError').innerText = '';
+        document.getElementById('endDateError').innerText = '';
+
+        // Validate select trùng
+        if (fieldStaff === planner) {
+            document.getElementById('fieldStaffError').innerText = 'Field Staff must not be the same as Planner.';
+            document.getElementById('plannerError').innerText = 'Planner must not be the same as Field Staff.';
+            isValid = false;
+        }
+
+        if (fieldStaff === accountant) {
+            document.getElementById('fieldStaffError').innerText = 'Field Staff must not be the same as Accountant.';
+            document.getElementById('accountantError').innerText = 'Accountant must not be the same as Field Staff.';
+            isValid = false;
+        }
+
+        if (planner === accountant) {
+            document.getElementById('plannerError').innerText = 'Planner must not be the same as Accountant.';
+            document.getElementById('accountantError').innerText = 'Accountant must not be the same as Planner.';
+            isValid = false;
+        }
+
+        // Validate ngày
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            document.getElementById('startDateError').innerText = 'Start Date must not be after End Date.';
+            document.getElementById('endDateError').innerText = 'End Date must be after Start Date.';
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault(); // Chặn submit nếu có lỗi
+        }
+    });
+});
+</script>
+
 </body>
 </html>

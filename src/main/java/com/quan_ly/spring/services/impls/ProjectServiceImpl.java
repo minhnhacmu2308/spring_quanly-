@@ -9,6 +9,7 @@ import com.quan_ly.spring.utils.EncrytedPasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -42,6 +43,9 @@ public class ProjectServiceImpl implements ProjectService {
             project.setStartDate(updatedProject.getStartDate());
             project.setEndDate(updatedProject.getEndDate());
             project.setStatus(updatedProject.getStatus());
+            project.setAccountant(updatedProject.getAccountant());
+            project.setFieldStaff(updatedProject.getFieldStaff());
+            project.setPlanner(updatedProject.getPlanner());
             return projectRepository.save(project);
         }).orElseThrow(() -> new RuntimeException("Project not found with ID: " + id));
     }
@@ -49,5 +53,15 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteProject(Long id) {
         projectRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Project> getProjectByUserAndDate(User user, LocalDate endDate) {
+        return projectRepository.findActiveProjectsByUser(user,LocalDate.now());
+    }
+
+    @Override
+    public List<Project> getProjectByUserAndDateNew(User user) {
+        return projectRepository.findActiveProjectsByUserAll(user);
     }
 }

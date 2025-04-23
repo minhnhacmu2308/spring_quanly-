@@ -32,6 +32,11 @@
 
                     <dt class="col-sm-5">End Date:</dt>
                     <dd class="col-sm-7" th:text="${project.endDate}"></dd>
+                    <dt class="col-sm-5">Field Staff Name:</dt>
+                    <dd class="col-sm-7" th:text="${project.fieldStaff.fullName}"></dd>
+
+                    <dt class="col-sm-5">Planner Name:</dt>
+                    <dd class="col-sm-7" th:text="${project.planner.fullName}"></dd>
                 </dl>
             </div>
             <div class="col-md-6">
@@ -48,6 +53,9 @@
                     <dt class="col-sm-5">Remaining Budget:</dt>
                     <dd class="col-sm-7" th:text="${#numbers.formatDecimal(remainingBudget, 1, 'COMMA', 2, 'POINT')} + ' ₫'"></dd>
 
+
+                    <dt class="col-sm-5">Accountant Name:</dt>
+                    <dd class="col-sm-7" th:text="${project.accountant.fullName}"></dd>
                 </dl>
             </div>
         </div>

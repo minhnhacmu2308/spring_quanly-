@@ -1,12 +1,16 @@
 package com.quan_ly.spring.services.impls;
 
+import com.quan_ly.spring.enums.Role;
 import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.repositories.UserRepository;
 import com.quan_ly.spring.services.UserService;
 import com.quan_ly.spring.utils.EncrytedPasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,4 +77,20 @@ public class UserServiceImpl implements UserService {
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent(); // Giả sử bạn dùng Optional
     }
+
+    @Override
+    public List<User> getUsersExcludingManager() {
+        return userRepository.findByRoleNot(Role.MANAGER);
+    }
+
+    @Override
+    public List<User> getUsersByRole(Role role){
+        return userRepository.findByRole(role);
+    };
+
+    @Override
+    public List<User> findByRoleAndNotInActiveProjects(@Param("role") Role role, @Param("now") LocalDate now){
+        return userRepository.findByRoleAndNotInActiveProjects(role,now);
+    };
+
 }

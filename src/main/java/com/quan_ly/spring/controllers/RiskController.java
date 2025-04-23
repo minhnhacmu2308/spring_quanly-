@@ -2,6 +2,7 @@ package com.quan_ly.spring.controllers;
 
 import com.cloudinary.Cloudinary;
 import com.quan_ly.spring.constants.CommonConstant;
+import com.quan_ly.spring.enums.Role;
 import com.quan_ly.spring.exceptions.DocumentUploadException;
 import com.quan_ly.spring.models.Document;
 import com.quan_ly.spring.models.Project;
@@ -20,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -42,9 +45,11 @@ public class RiskController {
     Cloudinary cloudinary;
 
     @GetMapping("/home")
-    public String listRisks(Model model) {
-        model.addAttribute("risks", riskService.getAllRisks());
-        model.addAttribute("projects", projectService.getAllProjects());
+    public String listRisks(Model model,  HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        List<Risk> risks = user.getRole() == Role.MANAGER ? riskService.getRisksByManagerId(user.getUserId()) : riskService.getRisksReportedByUser(user);
+        model.addAttribute("risks", risks);
+        model.addAttribute("projects", projectService.getProjectByUserAndDate(user, LocalDate.now()));
         return "public/risk"; // View hiển thị danh sách rủi ro
     }
 

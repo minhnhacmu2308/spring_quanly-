@@ -2,6 +2,7 @@ package com.quan_ly.spring.services.impls;
 
 import com.quan_ly.spring.enums.ApproveStatus;
 import com.quan_ly.spring.models.Risk;
+import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.repositories.RiskRepository;
 import com.quan_ly.spring.services.RiskService;
 import org.springframework.stereotype.Service;
@@ -67,5 +68,13 @@ public class RiskServiceImpl implements RiskService {
             risk.setApproveStatus(ApproveStatus.APPROVED);
             return riskRepository.save(risk);
         }).orElseThrow(() -> new RuntimeException("Risk not found with ID: " + id));
+    }
+
+    @Override
+    public List<Risk> getRisksReportedByUser(User user) {
+        return riskRepository.findByReportedBy(user);
+    }
+    public List<Risk> getRisksByManagerId(Long managerId) {
+        return riskRepository.findRisksByProjectManagerId(managerId);
     }
 }

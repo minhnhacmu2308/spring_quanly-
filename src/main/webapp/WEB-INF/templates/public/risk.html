@@ -161,6 +161,10 @@
                                     th:attr="data-toggle='modal', data-target='#deleteRiskModal' + ${risk.riskId}">
                                 <i class="tio-delete"></i> Delete
                             </button>
+                            <a th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'UNDER_REVIEW'}" class="btn btn-sm btn-success" href="javascript:;"
+                               th:attr="data-toggle='modal', data-target='#sendNotification' + ${risk.riskId}">
+                                <i class="tio-edit"></i> Send notification
+                            </a>
                         </td>
                         <!-- Modal Chỉnh Sửa -->
                         <div class="modal fade" th:id="'editRiskModal'+${risk.riskId}" tabindex="-1" role="dialog" aria-labelledby="editRiskModalLabel" aria-hidden="true">
@@ -220,6 +224,44 @@
                                                 <label for="documentFile">Risk Detail</label>
                                                 <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt">
                                             </div>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Send notification modal -->
+                        <div class="modal fade" th:id="'sendNotification'+${risk.riskId}" tabindex="-1" role="dialog" aria-labelledby="sendNotificationLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="sendNotificationLabel">Send Notificaiton</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form th:action="@{/user/notifications/add/{projectId}(projectId=${risk.project.projectId})}" method="post" id="editProjectForm" enctype="multipart/form-data">
+                                            <input type="hidden" name="projectId" th:value="${risk.project.projectId}" />
+                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
+                                                <label for="projectId">Project</label>
+                                                <select class="form-control" name="projectId" required>
+                                                    <th:block th:each="project,index : ${projects}">
+                                                        <option th:if="${project.projectId == risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}" selected></option>
+                                                        <option th:if="${project.projectId != risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}"></option>
+                                                    </th:block>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="email">Title</label>
+                                                <input type="text"  class="form-control" name="title" id="title" required>
+                                            </div>
+                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
+                                                <label for="editDescription">Content</label>
+                                                <textarea class="form-control" id="editDescription"
+                                                         name="content" required></textarea>
+                                            </div>
+
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
                                         </form>
                                     </div>
