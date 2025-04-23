@@ -69,10 +69,64 @@
             }
         }
     </style>
+    <style>
+    .custom-toast-notification {
+        width: 320px;
+        margin-bottom: 10px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        animation: slideInRight 0.4s ease-out;
+        overflow: hidden;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .toast-header {
+        background-color: #1877f2;
+        color: white;
+        padding: 10px 16px;
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    .toast-body {
+        padding: 12px 16px;
+        font-size: 14px;
+        color: #333;
+        background-color: #f9f9f9;
+    }
+
+    .toast-hide {
+        opacity: 0;
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        transform: translateX(100%);
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const toast = document.getElementById("customToast");
             if (toast) {
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.5s ease';
+                    toast.style.opacity = 0;
+                    setTimeout(() => toast.remove(), 500); // Remove from DOM
+                }, 5000);
+            }
+
+            const toastNotification = document.getElementById("customToast");
+            if (toastNotification) {
                 setTimeout(() => {
                     toast.style.transition = 'opacity 0.5s ease';
                     toast.style.opacity = 0;
@@ -371,7 +425,63 @@
       }
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+            const userEmail = /*[[${session.user.email}]]*/ 'default@example.com';
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                const des = '/topic/notifications/'+userEmail;
+                stompClient.subscribe(des, function (notification) {
+                    const content = notification.body;
+                    showToast(notification.body.title, content, notification.body.sentAt);
+                });
+            });
+        });
+    </script>
+    <script>
+        function showToast(title, content, sentAt) {
+            const container = document.getElementById("customToastContainer");
 
+            // Tạo phần tử toast mới
+            const toast = document.createElement("div");
+            toast.classList.add("custom-toast-notification");
+            toast.style.backgroundColor = "#fff";
+            toast.style.padding = "15px 20px";
+            toast.style.borderRadius = "8px";
+            toast.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+            toast.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            toast.style.fontSize = "14px";
+            toast.style.maxWidth = "350px"; // Đặt chiều rộng tối đa của thông báo
+            toast.style.marginBottom = "15px"; // Khoảng cách giữa các thông báo
+            toast.style.transition = "transform 0.3s ease-out";
+
+            const formattedTime = new Date(sentAt).toLocaleString(); // Định dạng thời gian gửi thông báo
+
+            // Nội dung của toast
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <strong>${title}</strong>
+                </div>
+                <div class="toast-body">
+                    <span>${content}</span><br/>
+                    <small>${formattedTime}</small>
+                </div>
+            `;
+
+            // Thêm phần tử toast vào container
+            container.appendChild(toast);
+
+            // Thêm hiệu ứng vào và ẩn sau 8 giây
+            setTimeout(() => {
+                toast.style.transform = "translateX(100%)"; // Đẩy thông báo ra ngoài khi ẩn
+                setTimeout(() => toast.remove(), 500); // Xóa thông báo khỏi DOM sau khi ẩn
+            }, 80000); // Thời gian hiển thị là 8 giây
+        }
+    </script>
 
     <!-- IE Support -->
     <script>
@@ -380,6 +490,10 @@
 </head>
 
 <body class="   footer-offset">
+<!-- Đặt ở cuối body hoặc layout chính -->
+<div th:fragment="html_toast_notification" id="customToastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end;"></div>
+
+
 <div th:fragment="html_toast" id="customToast" class="custom-toast"
      th:if="${successMessage != null or errorMessage != null}">
     <div th:if="${successMessage != null}" class="toast-body toast-success">
@@ -492,10 +606,10 @@
                                 <a
                                         class="js-hs-unfold-invoker btn btn-icon btn-ghost-secondary rounded-circle"
                                         href="javascript:;"
-                                        data-hs-unfold-options='{
-                 "target": "#notificationDropdown",
-                 "type": "css-animation"
-               }'
+                                                            data-hs-unfold-options='{
+                                     "target": "#notificationDropdown",
+                                     "type": "css-animation"
+                                   }'
                                 >
                                     <i class="tio-notifications-on-outlined"></i>
                                     <span
@@ -1009,6 +1123,20 @@
                                         <span th:if="${session.user.role.name() == 'MANAGER'}">Documents Management</span>
     <span th:unless="${session.user.role.name() == 'MANAGER'}">Look Up Documents</span>
                                     </span
+                                    >
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a
+                                        class="js-nav-tooltip-link nav-link"
+                                        href="/user/notifications"
+                                        title="Documents Managemennot"
+                                        data-placement="left"
+                                >
+                                    <i class="tio-notifications nav-icon"></i>
+                                    <span
+                                            class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
+                                    >Notification Management</span
                                     >
                                 </a>
                             </li>

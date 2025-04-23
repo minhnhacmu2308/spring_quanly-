@@ -1,12 +1,16 @@
 package com.quan_ly.spring.controllers;
 
 import com.quan_ly.spring.constants.CommonConstant;
+import com.quan_ly.spring.enums.Priority;
 import com.quan_ly.spring.enums.Role;
+import com.quan_ly.spring.models.Notification;
 import com.quan_ly.spring.models.Project;
 import com.quan_ly.spring.models.Expense;
 import com.quan_ly.spring.models.User;
+import com.quan_ly.spring.services.NotificationService;
 import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.UserService;
+import com.quan_ly.spring.utils.SendNotificationUtil;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -28,6 +32,11 @@ public class ProjectController {
     @Autowired
     ProjectService projectService;
 
+    @Autowired
+    SendNotificationUtil sendNotificationUtil;
+
+    @Autowired
+    NotificationService notificationService;
     @Autowired
     UserService userService;
 
@@ -63,21 +72,51 @@ public class ProjectController {
     }
 
     @PostMapping("/create")
-    public String createProject(@ModelAttribute("project") Project project, RedirectAttributes redirectAttributes,
-                                HttpSession session,  @RequestParam("planner_id") Long planner_id,
-                                @RequestParam("field_staff_id") Long field_staff_id,  @RequestParam("accountant_id") Long accountant_id) {
-        User user = (User) session.getAttribute("user");
-        User fieldStaff = (User) userService.getUserById(field_staff_id).get();
-        User planner = (User) userService.getUserById(planner_id).get();
-        User accountant = (User) userService.getUserById(accountant_id).get();
-        project.setManager(user);
+    public String createProject(@ModelAttribute("project") Project project,
+                                RedirectAttributes redirectAttributes,
+                                HttpSession session,
+                                @RequestParam("planner_id") Long planner_id,
+                                @RequestParam("field_staff_id") Long field_staff_id,
+                                @RequestParam("accountant_id") Long accountant_id) {
+
+        User manager = (User) session.getAttribute("user");
+        User fieldStaff = userService.getUserById(field_staff_id).orElse(null);
+        User planner = userService.getUserById(planner_id).orElse(null);
+        User accountant = userService.getUserById(accountant_id).orElse(null);
+
+        project.setManager(manager);
         project.setFieldStaff(fieldStaff);
         project.setPlanner(planner);
         project.setAccountant(accountant);
         projectService.createProject(project);
-        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE, messageSource.getMessage("create_success", null, Locale.getDefault()));
+
+        // Send notifications to 3 assigned users
+        sendNotificationToAssignee(fieldStaff, "Field Staff", project);
+        sendNotificationToAssignee(planner, "Planner", project);
+        sendNotificationToAssignee(accountant, "Accountant", project);
+
+        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                messageSource.getMessage("create_success", null, Locale.getDefault()));
+
         return "redirect:/project/home";
     }
+
+    private void sendNotificationToAssignee(User user, String role, Project project) {
+        if (user == null) return;
+
+        Notification notification = new Notification();
+        notification.setTitle("You have been assigned to a new project");
+        notification.setContent(SendNotificationUtil.buildProjectNotificationContent(project, role));
+        notification.setUser(user);
+        notification.setPriority(Priority.MEDIUM);
+        notification.setIsRead(false);
+
+        // Optional: Save notification to the database if needed
+         notificationService.saveNotification(notification);
+
+        sendNotificationUtil.sendNotificationToUser(user.getEmail(), notification);
+    }
+
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
