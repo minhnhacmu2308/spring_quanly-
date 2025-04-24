@@ -70,6 +70,11 @@
         }
     </style>
     <style>
+      .badge-hide {
+          opacity: 0;          /* biến mất nhưng vẫn chiếm chỗ – icon còn nguyên */
+          pointer-events: none; /* tránh click nhầm */
+        }
+
       /* ===== Toast Card ===== */
       .custom-toast-notification{
           width:340px;
@@ -456,9 +461,34 @@
                 stompClient.subscribe(des, function (notification) {
                     const content = JSON.parse(notification.body);
                     showToast(content.title, content.content, content.sentAt);
+                    markBellUnread();
                 });
             });
         });
+        function markBellUnread(){
+           const badge=document.getElementById("bellBadge");
+           if(badge) badge.classList.remove("badge-hide");   // hiện chấm đỏ
+        }
+
+        function clearBellBadge(){
+           const badge=document.getElementById("bellBadge");
+           if(badge) badge.classList.add("badge-hide");      // ẩn chấm đỏ
+        }
+
+
+       /* Bọc toàn bộ vào DOMContentLoaded nếu script trong <head> */
+        document.addEventListener('DOMContentLoaded', ()=>{
+
+           const invoker = document.getElementById('bellInvoker');
+           if(!invoker){ console.warn('bellInvoker not found'); return; }
+
+           invoker.addEventListener('click', e=>{   // kiểm tra
+               clearBellBadge();
+           }, true); // capture=true giúp chạy trước lib khác
+
+        });
+
+
     </script>
     <script>
       function showToast(title, content, sentAt){
@@ -610,19 +640,17 @@
                         <li class="nav-item d-none d-sm-inline-block">
                             <!-- Notification -->
                             <div class="hs-unfold">
-                                <a
-                                        class="js-hs-unfold-invoker btn btn-icon btn-ghost-secondary rounded-circle"
-                                        href="javascript:;"
-                                                            data-hs-unfold-options='{
-                                     "target": "#notificationDropdown",
-                                     "type": "css-animation"
-                                   }'
-                                >
+                                <a class="js-hs-unfold-invoker btn btn-icon btn-ghost-secondary rounded-circle"
+                                   href="javascript:;"
+                                   data-hs-unfold-options='{ "target": "#notificationDropdown","type":"css-animation" }'
+                                   id="bellInvoker">
                                     <i class="tio-notifications-on-outlined"></i>
-                                    <span
-                                            class="btn-status btn-sm-status btn-status-danger"
-                                    ></span>
+
+                                    <!-- chấm đỏ – mặc định ẩn bằng badge-hide -->
+                                    <span class="btn-status btn-sm-status btn-status-danger badge-hide"
+                                          id="bellBadge"></span>
                                 </a>
+
 
                                 <div
                                         id="notificationDropdown"
