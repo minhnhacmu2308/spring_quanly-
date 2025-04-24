@@ -19,16 +19,15 @@ public class SendNotificationUtil {
     }
 
     public static String buildProjectNotificationContent(Project project, String role) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("A new project has been created!\n\n");
-        sb.append("Project Name: ").append(project.getProjectName()).append("\n");
-        sb.append("Project Manager: ").append(project.getManager().getFullName()).append("\n\n");
-        sb.append("Budget: ").append(project.getBudget()).append(" VND\n");
-        sb.append("Start Date: ").append(project.getStartDate()).append("\n");
-        sb.append("Status: ").append(project.getStatus()).append("\n\n");
-        sb.append("You have been assigned the role of: ").append(role).append(".\n");
-
-        return sb.toString();
+        return String.format(
+                """
+                Project Name: %s
+                Project Manager: %s 
+                %s
+                """,
+                project.getProjectName(),
+                project.getManager().getFullName(),
+                role
+        );
     }
 }

@@ -70,49 +70,67 @@
         }
     </style>
     <style>
-    .custom-toast-notification {
-        width: 320px;
-        margin-bottom: 10px;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        animation: slideInRight 0.4s ease-out;
-        overflow: hidden;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
+      /* ===== Toast Card ===== */
+      .custom-toast-notification{
+          width:340px;
+          margin-bottom:12px;
+          border-radius:12px;
+          background:#fff;
+          box-shadow:0 6px 20px rgba(0,0,0,.15);
+          overflow:hidden;
+          animation:slideIn .35s ease forwards;
+          display:flex;
+          flex-direction:row;
+          gap:12px;
+          padding:14px 16px;
+          font-family:"Segoe UI",Arial,sans-serif;
+      }
 
-    .toast-header {
-        background-color: #1877f2;
-        color: white;
-        padding: 10px 16px;
-        font-weight: bold;
-        font-size: 15px;
-    }
+      /* ===== Icon bubble ===== */
+      .toast-icon{
+          flex:0 0 36px;
+          height:36px;
+          border-radius:50%;
+          background:#1877f2;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          color:#fff;
+          font-size:18px;
+      }
 
-    .toast-body {
-        padding: 12px 16px;
-        font-size: 14px;
-        color: #333;
-        background-color: #f9f9f9;
-    }
+      /* ===== Text area ===== */
+      .toast-text{flex:1 1 auto}
+      .toast-title{
+          font-weight:600;
+          font-size:15px;
+          color:#050505;
+          margin-bottom:4px;
+          line-height:1.25;
+      }
+      .toast-body{
+          font-size:14px;
+          color:#4b4b4b;
+          line-height:1.35;
+      }
+      .toast-time{
+          font-size:12px;
+          color:#8a8d91;
+          margin-top:6px;
+      }
 
-    .toast-hide {
-        opacity: 0;
-        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        transform: translateX(100%);
-    }
+      /* ===== Fade‑out ===== */
+      .toast-hide{
+          opacity:0;
+          transform:translateX(100%);
+          transition:opacity .4s,transform .4s;
+      }
 
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-</style>
+      @keyframes slideIn{
+          from{opacity:0;transform:translateX(100%)}
+          to{opacity:1;transform:translateX(0)}
+      }
+    </style>``
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
@@ -436,52 +454,41 @@
                 console.log('Connected: ' + frame);
                 const des = '/topic/notifications/'+userEmail;
                 stompClient.subscribe(des, function (notification) {
-                    const content = notification.body;
-                    showToast(notification.body.title, content, notification.body.sentAt);
+                    const content = JSON.parse(notification.body);
+                    showToast(content.title, content.content, content.sentAt);
                 });
             });
         });
     </script>
     <script>
-        function showToast(title, content, sentAt) {
-            const container = document.getElementById("customToastContainer");
+      function showToast(title, content, sentAt){
+          const container=document.getElementById("customToastContainer");
+          if(!container) return;
 
-            // Tạo phần tử toast mới
-            const toast = document.createElement("div");
-            toast.classList.add("custom-toast-notification");
-            toast.style.backgroundColor = "#fff";
-            toast.style.padding = "15px 20px";
-            toast.style.borderRadius = "8px";
-            toast.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
-            toast.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-            toast.style.fontSize = "14px";
-            toast.style.maxWidth = "350px"; // Đặt chiều rộng tối đa của thông báo
-            toast.style.marginBottom = "15px"; // Khoảng cách giữa các thông báo
-            toast.style.transition = "transform 0.3s ease-out";
+          const toast=document.createElement("div");
+          toast.className="custom-toast-notification";
 
-            const formattedTime = new Date(sentAt).toLocaleString(); // Định dạng thời gian gửi thông báo
+          const icon=`<div class="toast-icon">🔔</div>`; /* use 🛎️, 🔔, or SVG */
 
-            // Nội dung của toast
-            toast.innerHTML = `
-                <div class="toast-header">
-                    <strong>${title}</strong>
-                </div>
-                <div class="toast-body">
-                    <span>${content}</span><br/>
-                    <small>${formattedTime}</small>
-                </div>
-            `;
+          const timeStr=new Date(sentAt).toLocaleString();
 
-            // Thêm phần tử toast vào container
-            container.appendChild(toast);
+          toast.innerHTML=`
+              ${icon}
+              <div class="toast-text">
+                  <div class="toast-title">${title}</div>
+                  <div class="toast-body">${content}</div>
+                  <div class="toast-time">${timeStr}</div>
+              </div>
+          `;
 
-            // Thêm hiệu ứng vào và ẩn sau 8 giây
-            setTimeout(() => {
-                toast.style.transform = "translateX(100%)"; // Đẩy thông báo ra ngoài khi ẩn
-                setTimeout(() => toast.remove(), 500); // Xóa thông báo khỏi DOM sau khi ẩn
-            }, 80000); // Thời gian hiển thị là 8 giây
-        }
+          container.appendChild(toast);
+
+          /* auto‑dismiss after 8 s */
+          setTimeout(()=>{toast.classList.add("toast-hide");
+              setTimeout(()=>toast.remove(),400);},6000);
+      }
     </script>
+
 
     <!-- IE Support -->
     <script>
@@ -491,7 +498,7 @@
 
 <body class="   footer-offset">
 <!-- Đặt ở cuối body hoặc layout chính -->
-<div th:fragment="html_toast_notification" id="customToastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end;"></div>
+<div th:fragment="html_toast_notification" id="customToastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end;"></div>
 
 
 <div th:fragment="html_toast" id="customToast" class="custom-toast"

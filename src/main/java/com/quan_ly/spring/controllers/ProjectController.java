@@ -108,7 +108,7 @@ public class ProjectController {
         notification.setTitle("You have been assigned to a new project");
         notification.setContent(SendNotificationUtil.buildProjectNotificationContent(project, role));
         notification.setUser(user);
-        notification.setPriority(Priority.MEDIUM);
+        notification.setPriority(Priority.LOW);
         notification.setIsRead(false);
 
         // Optional: Save notification to the database if needed
@@ -131,28 +131,36 @@ public class ProjectController {
                                 @ModelAttribute("project") Project updatedProject,
                                 RedirectAttributes redirectAttributes,
                                 HttpSession session,
-                                @RequestParam("planner_id") Long planner_id,
-                                @RequestParam("field_staff_id") Long field_staff_id,
-                                @RequestParam("accountant_id") Long accountant_id) {
+                                @RequestParam("planner_id")   Long plannerId,
+                                @RequestParam("field_staff_id") Long fieldStaffId,
+                                @RequestParam("accountant_id")  Long accountantId) {
 
-        Optional<Project> optionalExistingProject = projectService.getProjectById(id);
-
-        if (optionalExistingProject.isEmpty()) {
+        Optional<Project> optOld = projectService.getProjectById(id);
+        if (optOld.isEmpty()) {
             redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
                     messageSource.getMessage("project_not_found", null, Locale.getDefault()));
             return "redirect:/project/home";
         }
 
-        User user = (User) session.getAttribute("user");
-        User fieldStaff = userService.getUserById(field_staff_id).orElse(null);
-        User planner = userService.getUserById(planner_id).orElse(null);
-        User accountant = userService.getUserById(accountant_id).orElse(null);
+        /* ---------- Resolve users ---------- */
+        User manager     = (User) session.getAttribute("user");
+        User newPlanner  = userService.getUserById(plannerId).orElse(null);
+        User newField    = userService.getUserById(fieldStaffId).orElse(null);
+        User newAccount  = userService.getUserById(accountantId).orElse(null);
 
-        updatedProject.setProjectId(id); // đảm bảo ID đúng
-        updatedProject.setManager(user);
-        updatedProject.setFieldStaff(fieldStaff);
-        updatedProject.setPlanner(planner);
-        updatedProject.setAccountant(accountant);
+        Project old = optOld.get();                                    // <‑‑ old snapshot
+
+        /* ---------- Detect changes & notify ---------- */
+        handleAssigneeChange(old.getPlanner(),   newPlanner,  "Planner",    old);
+        handleAssigneeChange(old.getFieldStaff(),newField,    "Field Staff",old);
+        handleAssigneeChange(old.getAccountant(),newAccount,  "Accountant", old);
+
+        /* ---------- persist update ---------- */
+        updatedProject.setProjectId(id);
+        updatedProject.setManager(manager);
+        updatedProject.setPlanner(newPlanner);
+        updatedProject.setFieldStaff(newField);
+        updatedProject.setAccountant(newAccount);
 
         projectService.updateProject(id, updatedProject);
 
@@ -162,32 +170,90 @@ public class ProjectController {
     }
 
 
-    @GetMapping("/delete/{id}")
-    public String deleteProject(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Optional<Project> optionalProject = projectService.getProjectById(id);
+    private void handleAssigneeChange(User oldUser,
+                                      User newUser,
+                                      String role,
+                                      Project project) {
 
-        if (optionalProject.isPresent()) {
-            Project project = optionalProject.get();
-
-            boolean hasChildren =
-                    project.getDocuments() != null && !project.getDocuments().isEmpty() ||
-                            project.getRisks() != null && !project.getRisks().isEmpty() ||
-                            project.getProcesses() != null && !project.getProcesses().isEmpty() ||
-                            project.getExpenses() != null && !project.getExpenses().isEmpty();
-
-            if (hasChildren) {
-                redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
-                        "This project cannot be deleted because it has related documents, risks, processes, or expenses.");
-            } else {
-                projectService.deleteProject(id);
-                redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
-                        messageSource.getMessage("delete_success", null, Locale.getDefault()));
-            }
-        } else {
-            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE, "Project not found!");
+        // 1️⃣ removed?
+        if (oldUser != null && !oldUser.equals(newUser)) {
+            Notification n = new Notification();
+            n.setTitle("You have been removed from a project");
+            n.setContent(String.format(
+                    "You are no longer assigned to project \"%s\" as %s.",
+                    project.getProjectName(), role));
+            n.setUser(oldUser);
+            n.setPriority(Priority.LOW);
+            sendNotificationUtil.sendNotificationToUser(oldUser.getEmail(), n);
         }
+
+        // 2️⃣ newly assigned?
+        if (newUser != null && !newUser.equals(oldUser)) {
+            Notification n = new Notification();
+            n.setTitle("You have been assigned to a project");
+            n.setContent(SendNotificationUtil
+                    .buildProjectNotificationContent(project, role));
+            n.setUser(newUser);
+            n.setPriority(Priority.LOW);
+            sendNotificationUtil.sendNotificationToUser(newUser.getEmail(), n);
+        }
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteProject(@PathVariable Long id,
+                                RedirectAttributes redirectAttributes) {
+
+        Optional<Project> opt = projectService.getProjectById(id);
+
+        if (opt.isEmpty()) {
+            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE, "Project not found!");
+            return "redirect:/project/home";
+        }
+
+        Project project = opt.get();
+
+        /* ---- guard: has children? ---- */
+        boolean hasChildren =
+                (project.getDocuments()!=null && !project.getDocuments().isEmpty()) ||
+                        (project.getRisks()!=null     && !project.getRisks().isEmpty())     ||
+                        (project.getProcesses()!=null && !project.getProcesses().isEmpty()) ||
+                        (project.getExpenses()!=null  && !project.getExpenses().isEmpty());
+
+        if (hasChildren) {
+            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
+                    "This project cannot be deleted because it has related documents, risks, processes, or expenses.");
+            return "redirect:/project/home";
+        }
+
+        /* ===================================================================== */
+        /* 1️⃣  Send “project deleted” notifications BEFORE deleting in DB        */
+        /* ===================================================================== */
+        sendProjectDeletedToast(project.getManager(),   project);
+        sendProjectDeletedToast(project.getPlanner(),   project);
+        sendProjectDeletedToast(project.getFieldStaff(),project);
+        sendProjectDeletedToast(project.getAccountant(),project);
+
+        /* 2️⃣  delete  */
+        projectService.deleteProject(id);
+        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                messageSource.getMessage("delete_success", null, Locale.getDefault()));
 
         return "redirect:/project/home";
     }
 
+    /* ----------------------------------------------------------------------- */
+    /* helper: build & push a deletion notice to a single user                 */
+    private void sendProjectDeletedToast(User user, Project project){
+        if(user==null) return;
+
+        Notification n = new Notification();
+        n.setTitle("Project removed");
+        n.setContent(String.format(
+                "The project \"%s\" you were participating in has been deleted.",
+                project.getProjectName()));
+        n.setUser(user);
+        n.setPriority(Priority.MEDIUM);
+
+        sendNotificationUtil.sendNotificationToUser(user.getEmail(), n);
+    }
 }
