@@ -49,14 +49,25 @@ public class NotificationController {
 
     // Lấy danh sách thông báo theo userId
     @GetMapping("/all")
-    public String getNotificationsByUserId(HttpSession session,Model model) {
+    public String getNotificationsByUserId(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         Optional<User> userOptional = userService.getUserById(user.getUserId());
+
         if (userOptional.isPresent()) {
             List<Notification> notifications = notificationService.getNotificationsByUser(userOptional.get());
+
+            // Sắp xếp theo priority: HIGH > MEDIUM > LOW
+            notifications.sort(Comparator.comparingInt(n -> {
+                Priority p = n.getPriority();
+                if (p == Priority.HIGH) return 0;
+                if (p == Priority.MEDIUM) return 1;
+                return 2; // LOW
+            }));
+
             model.addAttribute("notifications", notifications);
             return "public/notification";
         }
+
         return "public/notification";
     }
 
@@ -77,7 +88,6 @@ public class NotificationController {
     @GetMapping("/detail/{id}")
     public String viewNotificationDetail(@PathVariable Long id, Model model) {
         Optional<Notification> optionalNotification = notificationService.getNotificationById(id);
-        System.out.println("Notification content:\n" + optionalNotification.get().getContent());
         if (optionalNotification.isPresent()) {
             Notification notification = optionalNotification.get();
 
