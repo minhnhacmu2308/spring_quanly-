@@ -91,30 +91,14 @@ public class ProjectController {
         projectService.createProject(project);
 
         // Send notifications to 3 assigned users
-        sendNotificationToAssignee(fieldStaff, "Field Staff", project);
-        sendNotificationToAssignee(planner, "Planner", project);
-        sendNotificationToAssignee(accountant, "Accountant", project);
+        sendNotificationUtil.sendNotificationToAssignee(fieldStaff, "Field Staff", project);
+        sendNotificationUtil.sendNotificationToAssignee(planner, "Planner", project);
+        sendNotificationUtil.sendNotificationToAssignee(accountant, "Accountant", project);
 
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("create_success", null, Locale.getDefault()));
 
         return "redirect:/project/home";
-    }
-
-    private void sendNotificationToAssignee(User user, String role, Project project) {
-        if (user == null) return;
-
-        Notification notification = new Notification();
-        notification.setTitle("You have been assigned to a new project");
-        notification.setContent(SendNotificationUtil.buildProjectNotificationContent(project, role));
-        notification.setUser(user);
-        notification.setPriority(Priority.LOW);
-        notification.setIsRead(false);
-
-        // Optional: Save notification to the database if needed
-         notificationService.saveNotification(notification);
-
-        sendNotificationUtil.sendNotificationToUser(user.getEmail(), notification);
     }
 
 
@@ -185,6 +169,7 @@ public class ProjectController {
             n.setUser(oldUser);
             n.setPriority(Priority.LOW);
             sendNotificationUtil.sendNotificationToUser(oldUser.getEmail(), n);
+            notificationService.saveNotification(n);
         }
 
         // 2️⃣ newly assigned?
@@ -196,6 +181,7 @@ public class ProjectController {
             n.setUser(newUser);
             n.setPriority(Priority.LOW);
             sendNotificationUtil.sendNotificationToUser(newUser.getEmail(), n);
+            notificationService.saveNotification(n);
         }
     }
 

@@ -8,8 +8,10 @@ import com.quan_ly.spring.models.Document;
 import com.quan_ly.spring.models.Project;
 import com.quan_ly.spring.models.Risk;
 import com.quan_ly.spring.models.User;
+import com.quan_ly.spring.services.NotificationService;
 import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.RiskService;
+import com.quan_ly.spring.utils.SendNotificationUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,12 @@ public class RiskController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    SendNotificationUtil sendNotificationUtil;
+
+    @Autowired
+    NotificationService notificationService;
 
     @Autowired
     Cloudinary cloudinary;
@@ -90,8 +98,13 @@ public class RiskController {
             risk.setReportedAt(LocalDateTime.now());
             risk.setUpdatedAt(LocalDateTime.now());
             Long projectId = Long.parseLong(request.getParameter("projectId"));
-            risk.setProject(projectService.getProjectById(projectId).get());
+            Project pj = projectService.getProjectById(projectId).get();
+            risk.setProject(pj);
             riskService.createRisk(risk);
+
+            //notification
+            sendNotificationUtil.sendRiskNotificationToManager(risk);
+
             redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                     messageSource.getMessage("create_success", null, Locale.getDefault()));
             return "redirect:/risk/home";

@@ -9,12 +9,18 @@ import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/user/notifications")
@@ -40,6 +46,53 @@ public class NotificationController {
         model.addAttribute("notifications", notificationService.getAllNotifications());
         return "public/notification";
     }
+
+    // Lấy danh sách thông báo theo userId
+    @GetMapping("/all")
+    public String getNotificationsByUserId(HttpSession session,Model model) {
+        User user = (User) session.getAttribute("user");
+        Optional<User> userOptional = userService.getUserById(user.getUserId());
+        if (userOptional.isPresent()) {
+            List<Notification> notifications = notificationService.getNotificationsByUser(userOptional.get());
+            model.addAttribute("notifications", notifications);
+            return "public/notification";
+        }
+        return "public/notification";
+    }
+
+    @GetMapping("/{userId}")
+    @ResponseBody
+    public List<Notification> getNotificationsByUserIdTop10(@PathVariable Long userId) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        if (userOptional.isPresent()) {
+            List<Notification> notifications = notificationService.getNotificationsByUser(userOptional.get());
+            return notifications.stream()
+                    .sorted(Comparator.comparing(Notification::getSentAt).reversed()) // Sắp xếp giảm dần theo sentAt
+                    .limit(10)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    @GetMapping("/detail/{id}")
+    public String viewNotificationDetail(@PathVariable Long id, Model model) {
+        Optional<Notification> optionalNotification = notificationService.getNotificationById(id);
+        System.out.println("Notification content:\n" + optionalNotification.get().getContent());
+        if (optionalNotification.isPresent()) {
+            Notification notification = optionalNotification.get();
+
+            // Nếu chưa đọc thì đánh dấu là đã đọc
+            if (!notification.getIsRead()) {
+                notification.setIsRead(true);
+                notificationService.saveNotification(notification); // Cập nhật lại DB
+            }
+
+            model.addAttribute("notification", notification);
+            return "public/notification-detail";
+        }
+        return "redirect:/user/notifications";
+    }
+
 
 
     // Xử lý thêm mới

@@ -5,6 +5,8 @@
 <body>
 <th:block th:replace="public/fragments :: html_toast"></th:block>
 <th:block th:replace="public/fragments :: html_header"></th:block>
+<th:block th:replace="public/fragments :: html_toast_notification"></th:block>
+
 
 <main id="content" role="main" class="main pointer-event">
     <div class="content container-fluid">
@@ -111,103 +113,102 @@
                     </thead>
                     <tbody>
 
-                    <tr th:each="doc, indexStat : ${documents}">
-                        <td th:text="${indexStat.index + 1}"></td>
-                        <td th:text="${doc.title}"></td>
-                        <td th:text="${doc.content}"></td>
-                        <td th:text="${doc.priority}"></td>
-                        <td th:text="${doc.user.fullName}"></td>
-                        <td th:text="${doc.isRead ? 'Read' : 'Unread'}"></td>
-                        <td th:text="${#dates.format(doc.sendAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <tr th:each="noti, indexStat : ${notifications}">
+                        <td th:text="${noti.notificationId}"></td>
+                        <td th:text="${noti.title}"></td>
+                        <td><pre style="font-family: inherit; font-size: inherit; margin: 0;" th:text="${noti.content}"></pre></td>
                         <td>
-                            <button class="btn btn-sm btn-info" data-toggle="modal"
-                                    th:attr="data-target='#pdfModal' + ${doc.documentId}">
-                                <i class="tio-visible"></i>
-                            </button>
-                            <a class="btn btn-sm btn-success" th:if="${session.user.role.name() == 'MANAGER'}" href="javascript:;"
-                               data-toggle="modal" th:attr="data-target='#editDocumentModal' + ${doc.documentId}">
-                                <i class="tio-edit"></i> Edit
-                            </a>
-                            <button class="btn btn-sm btn-danger"
-                                    th:if="${session.user.role.name() == 'MANAGER'}"
-                                    data-toggle="modal" th:attr="data-target='#deleteDocumentModal' + ${doc.documentId}">
-                                <i class="tio-delete"></i> Delete
-                            </button>
+                            <span th:switch="${noti.priority.name()}">
+                                <span th:case="'HIGH'" class="badge badge-danger" th:text="${noti.priority}"></span>
+                                <span th:case="'MEDIUM'" class="badge badge-warning" th:text="${noti.priority}"></span>
+                                <span th:case="'LOW'" class="badge badge-success" th:text="${noti.priority}"></span>
+                                <span th:case="*"
+                                      class="badge badge-secondary" th:text="${noti.priority}"></span> <!-- fallback -->
+                            </span>
                         </td>
 
-                        <!-- PDF Modal -->
-                        <div class="modal fade" th:id="'pdfModal' + ${doc.documentId}" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-xl">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="pdfModalLabel">Preview Document</h5>
-                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.pdf') or #strings.endsWith(doc.filePath, '.txt')}">
-                                            <iframe th:src="@{${doc.filePath}}" width="100%" height="700px"></iframe>
-                                            <th:block th:if="${#strings.endsWith(doc.filePath, '.txt')}">
-                                                <div style="text-align: center; margin-top: 10px;">
-                                                    <a th:href="@{${doc.filePath}}" class="btn btn-success" download="document.txt">
-                                                        <i class="fas fa-download"></i> Download file TXT
-                                                    </a>
-                                                </div>
-                                            </th:block>
-                                        </th:block>
-                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.docx')}">
-                                            <p>This file cannot be previewed. Please download.</p>
-                                            <a th:href="@{${doc.filePath}}" class="btn btn-success" target="_blank">Download document</a>
-                                        </th:block>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <td th:text="${noti.user.fullName}"></td>
+                        <td th:text="${noti.isRead ? 'Read' : 'Unread'}"></td>
+                        <td th:text="${#temporals.format(noti.sentAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td>
+                            <a class="btn btn-sm btn-info" th:href="@{'/user/notifications/detail/' + ${noti.notificationId}}">
+                                <i class="tio-visible"></i> Detail
+                            </a>
+                        </td>
 
-                        <!-- Edit Modal -->
-                        <div class="modal fade" th:id="'editDocumentModal' + ${doc.documentId}" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <form th:action="@{/user/document/edit/{id}(id=${doc.documentId})}" method="post" enctype="multipart/form-data">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Document</h5>
-                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="form-group">
-                                                <label>Title</label>
-                                                <input type="text" name="title" th:value="${doc.title}" class="form-control" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Upload new file (Word/PDF/Txt)</label>
-                                                <input type="file" name="file" class="form-control-file" accept=".doc,.docx,.pdf,.txt">
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+<!--                        &lt;!&ndash; PDF Modal &ndash;&gt;-->
+<!--                        <div class="modal fade" th:id="'pdfModal' + ${doc.documentId}" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">-->
+<!--                            <div class="modal-dialog modal-xl">-->
+<!--                                <div class="modal-content">-->
+<!--                                    <div class="modal-header">-->
+<!--                                        <h5 class="modal-title" id="pdfModalLabel">Preview Document</h5>-->
+<!--                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-body">-->
+<!--                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.pdf') or #strings.endsWith(doc.filePath, '.txt')}">-->
+<!--                                            <iframe th:src="@{${doc.filePath}}" width="100%" height="700px"></iframe>-->
+<!--                                            <th:block th:if="${#strings.endsWith(doc.filePath, '.txt')}">-->
+<!--                                                <div style="text-align: center; margin-top: 10px;">-->
+<!--                                                    <a th:href="@{${doc.filePath}}" class="btn btn-success" download="document.txt">-->
+<!--                                                        <i class="fas fa-download"></i> Download file TXT-->
+<!--                                                    </a>-->
+<!--                                                </div>-->
+<!--                                            </th:block>-->
+<!--                                        </th:block>-->
+<!--                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.docx')}">-->
+<!--                                            <p>This file cannot be previewed. Please download.</p>-->
+<!--                                            <a th:href="@{${doc.filePath}}" class="btn btn-success" target="_blank">Download document</a>-->
+<!--                                        </th:block>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
 
-                        <!-- Delete Modal -->
-                        <div class="modal fade" th:id="'deleteDocumentModal' + ${doc.documentId}" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Confirm Delete</h5>
-                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Are you sure you want to delete <b th:text="${doc.title}"></b>?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <a class="btn btn-danger" th:href="@{'/user/document/delete/' + ${doc.documentId}}">Delete</a>
-                                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<!--                        &lt;!&ndash; Edit Modal &ndash;&gt;-->
+<!--                        <div class="modal fade" th:id="'editDocumentModal' + ${doc.documentId}" tabindex="-1" role="dialog">-->
+<!--                            <div class="modal-dialog" role="document">-->
+<!--                                <div class="modal-content">-->
+<!--                                    <form th:action="@{/user/document/edit/{id}(id=${doc.documentId})}" method="post" enctype="multipart/form-data">-->
+<!--                                        <div class="modal-header">-->
+<!--                                            <h5 class="modal-title">Edit Document</h5>-->
+<!--                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>-->
+<!--                                        </div>-->
+<!--                                        <div class="modal-body">-->
+<!--                                            <div class="form-group">-->
+<!--                                                <label>Title</label>-->
+<!--                                                <input type="text" name="title" th:value="${doc.title}" class="form-control" required>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group">-->
+<!--                                                <label>Upload new file (Word/PDF/Txt)</label>-->
+<!--                                                <input type="file" name="file" class="form-control-file" accept=".doc,.docx,.pdf,.txt">-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                        <div class="modal-footer">-->
+<!--                                            <button type="submit" class="btn btn-primary">Save Changes</button>-->
+<!--                                        </div>-->
+<!--                                    </form>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; Delete Modal &ndash;&gt;-->
+<!--                        <div class="modal fade" th:id="'deleteDocumentModal' + ${doc.documentId}" tabindex="-1" role="dialog">-->
+<!--                            <div class="modal-dialog" role="document">-->
+<!--                                <div class="modal-content">-->
+<!--                                    <div class="modal-header">-->
+<!--                                        <h5 class="modal-title">Confirm Delete</h5>-->
+<!--                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-body">-->
+<!--                                        Are you sure you want to delete <b th:text="${doc.title}"></b>?-->
+<!--                                    </div>-->
+<!--                                    <div class="modal-footer">-->
+<!--                                        <a class="btn btn-danger" th:href="@{'/user/document/delete/' + ${doc.documentId}}">Delete</a>-->
+<!--                                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
                     </tr>
 
 
