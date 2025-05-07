@@ -5,7 +5,7 @@
 <body>
 <th:block th:replace="public/fragments :: html_toast"></th:block>
 <th:block th:replace="public/fragments :: html_toast_notification"></th:block>
-<header th:replace="public/fragments ::html_header"></header>
+<header th:replace="public/fragments ::html_header(hasUnread=${hasUnread})"></header>
 
 <main id="content" role="main" class="main pointer-event">
 

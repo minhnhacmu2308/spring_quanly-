@@ -4,7 +4,7 @@
 </head>
 <body>
 <th:block th:replace="public/fragments :: html_toast"></th:block>
-<th:block th:replace="public/fragments :: html_header"></th:block>
+<header th:replace="public/fragments ::html_header(hasUnread=${hasUnread})"></header>
 <th:block th:replace="public/fragments :: html_toast_notification"></th:block>
 
 
@@ -263,7 +263,14 @@
                                                 <textarea class="form-control" id="editDescription"
                                                          name="content" required></textarea>
                                             </div>
-
+                                            <div class="form-group">
+                                                <label for="priority">Priority</label>
+                                                <select class="form-control" id="priority" name="priority" required>
+                                                    <option value="LOW">Low</option>
+                                                    <option value="MEDIUM">Medium</option>
+                                                    <option value="HIGH">High</option>
+                                                </select>
+                                            </div>
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
                                         </form>
                                     </div>

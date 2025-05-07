@@ -4,7 +4,7 @@
 </head>
 <body>
 <th:block th:replace="public/fragments :: html_toast"></th:block>
-<th:block th:replace="public/fragments :: html_header"></th:block>
+<header th:replace="public/fragments ::html_header(hasUnread=${hasUnread})"></header>
 <th:block th:replace="public/fragments :: html_toast_notification"></th:block>
 
 

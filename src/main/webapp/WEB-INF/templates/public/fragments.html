@@ -632,7 +632,7 @@
     </div>
 </div>
 <!-- ========== START LAYOUT CONTENT ========== -->
-<th:block th:fragment="html_header">
+<th:block th:fragment="html_header(hasUnread)">
     <div id="headerMain" class="d-none">
         <header
                 id="header"
@@ -736,6 +736,7 @@
                                    data-hs-unfold-options='{ "target": "#notificationDropdown","type":"css-animation" }'
                                    id="bellInvoker">
                                     <i class="tio-notifications-on-outlined"></i>
+                                    <span th:if="${hasUnread}" class="btn-status btn-sm-status btn-status-danger"></span>
 
                                     <!-- chấm đỏ – mặc định ẩn bằng badge-hide -->
                                     <span class="btn-status btn-sm-status btn-status-danger badge-hide"

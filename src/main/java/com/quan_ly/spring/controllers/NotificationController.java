@@ -1,5 +1,6 @@
 package com.quan_ly.spring.controllers;
 
+import com.quan_ly.spring.constants.CommonConstant;
 import com.quan_ly.spring.enums.Priority;
 import com.quan_ly.spring.models.Notification;
 import com.quan_ly.spring.models.Project;
@@ -9,17 +10,16 @@ import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -33,6 +33,9 @@ public class NotificationController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Autowired
     public NotificationController(NotificationService notificationService, UserService userService) {
@@ -107,15 +110,18 @@ public class NotificationController {
 
     // Xử lý thêm mới
     @PostMapping("/add/{projectId}")
-    public String addNotification(@ModelAttribute Notification notification, @PathVariable Long projectId) {
+    public String addNotification(@ModelAttribute Notification notification, @PathVariable Long projectId, RedirectAttributes redirectAttributes) {
         Optional<Project> project = projectService.getProjectById(projectId);
+        notification.setUser(project.get().getManager());
         String email = project.get().getManager().getEmail();
         // Gửi thông báo đến user qua WebSocket
         String destination = "/topic/notifications/"+email;
 
-        messagingTemplate.convertAndSend(destination, "message");
+        messagingTemplate.convertAndSend(destination, notification);
         notificationService.saveNotification(notification);
-        return "redirect:/user/notifications";
+        redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
+                messageSource.getMessage("notification_success", null, Locale.getDefault()));
+        return "redirect:/risk/home";
     }
 
 

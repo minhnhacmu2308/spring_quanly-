@@ -3,7 +3,7 @@
 <head th:replace="public/fragments :: html_head">
 </head>
 <body>
-<header th:replace="public/fragments ::html_header"></header>
+<header th:replace="public/fragments ::html_header(hasUnread=${hasUnread})"></header>
 <th:block th:replace="public/fragments :: html_toast_notification"></th:block>
 
 

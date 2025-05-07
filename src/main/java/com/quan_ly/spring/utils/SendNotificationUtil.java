@@ -1,6 +1,7 @@
 package com.quan_ly.spring.utils;
 
 import com.quan_ly.spring.enums.Priority;
+import com.quan_ly.spring.enums.Severity;
 import com.quan_ly.spring.models.Notification;
 import com.quan_ly.spring.models.Project;
 import com.quan_ly.spring.models.Risk;
@@ -80,12 +81,13 @@ public class SendNotificationUtil {
         if (risk == null || risk.getProject() == null || risk.getProject().getManager() == null) return;
 
         User manager = risk.getProject().getManager();
+        Priority priority = Priority.valueOf(risk.getSeverity().name());
 
         Notification notification = new Notification();
         notification.setTitle("New Risk Reported in Project");
         notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk));
         notification.setUser(manager);
-        notification.setPriority(Priority.HIGH); // Rủi ro thường ưu tiên cao
+        notification.setPriority(priority); // Rủi ro thường ưu tiên cao
         notification.setIsRead(false);
 
         notificationService.saveNotification(notification);
