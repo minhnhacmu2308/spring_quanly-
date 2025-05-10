@@ -401,59 +401,5 @@
     </div>
 </main>
 <script th:src="@{/public/assets/js/demo.js}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('projectForm');
-
-    form.addEventListener('submit', function(e) {
-        const fieldStaff = document.getElementById('fieldStaffId').value;
-        const planner = document.getElementById('plannerId').value;
-        const accountant = document.getElementById('accountantId').value;
-
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-
-        let isValid = true;
-
-        // Clear previous messages
-        document.getElementById('fieldStaffError').innerText = '';
-        document.getElementById('plannerError').innerText = '';
-        document.getElementById('accountantError').innerText = '';
-        document.getElementById('startDateError').innerText = '';
-        document.getElementById('endDateError').innerText = '';
-
-        // Validate select trùng
-        if (fieldStaff === planner) {
-            document.getElementById('fieldStaffError').innerText = 'Field Staff must not be the same as Planner.';
-            document.getElementById('plannerError').innerText = 'Planner must not be the same as Field Staff.';
-            isValid = false;
-        }
-
-        if (fieldStaff === accountant) {
-            document.getElementById('fieldStaffError').innerText = 'Field Staff must not be the same as Accountant.';
-            document.getElementById('accountantError').innerText = 'Accountant must not be the same as Field Staff.';
-            isValid = false;
-        }
-
-        if (planner === accountant) {
-            document.getElementById('plannerError').innerText = 'Planner must not be the same as Accountant.';
-            document.getElementById('accountantError').innerText = 'Accountant must not be the same as Planner.';
-            isValid = false;
-        }
-
-        // Validate ngày
-        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-            document.getElementById('startDateError').innerText = 'Start Date must not be after End Date.';
-            document.getElementById('endDateError').innerText = 'End Date must be after Start Date.';
-            isValid = false;
-        }
-
-        if (!isValid) {
-            e.preventDefault(); // Chặn submit nếu có lỗi
-        }
-    });
-});
-</script>
-
 </body>
 </html>
