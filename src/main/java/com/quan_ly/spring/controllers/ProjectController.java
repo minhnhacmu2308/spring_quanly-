@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/project")
+@RequestMapping("/user/project")
 public class ProjectController {
     @Autowired
     MessageSource messageSource;
@@ -40,7 +40,7 @@ public class ProjectController {
     @Autowired
     UserService userService;
 
-    @GetMapping({"/home"})
+    @GetMapping({""})
     public String listProjects(Model model,HttpSession session) {
         User user = (User) session.getAttribute("user");
         model.addAttribute("projects", projectService.getProjectByUserAndDateNew(user));
