@@ -189,8 +189,10 @@ public class RiskController {
     @GetMapping("/approve/{id}")
     public String appRisk(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         riskService.appRisk(id);
+        Risk risk = riskService.getRiskById(id).get();
+        sendNotificationUtil.sendRiskNotificationToManager(risk);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
-                messageSource.getMessage("delete_success", null, Locale.getDefault()));
+                messageSource.getMessage("approve_success", null, Locale.getDefault()));
         return "redirect:/risk/home";
     }
 

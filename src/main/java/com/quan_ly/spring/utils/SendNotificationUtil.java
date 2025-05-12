@@ -55,10 +55,10 @@ public class SendNotificationUtil {
         sendNotificationToUser(user.getEmail(), notification);
     }
 
-    public static String buildRiskNotificationContent(Risk risk) {
+    public static String buildRiskNotificationContent(Risk risk, String title) {
         return String.format(
                 """
-                A new risk has been reported.
+                %s
         
                 Project: %s
                 Reported By: %s
@@ -68,6 +68,7 @@ public class SendNotificationUtil {
                 Information:
                 %s
                 """,
+                title,
                 risk.getProject().getProjectName(),
                 risk.getReportedBy().getFullName(),
                 risk.getSeverity(),
@@ -85,7 +86,7 @@ public class SendNotificationUtil {
 
         Notification notification = new Notification();
         notification.setTitle("New Risk Reported in Project");
-        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk));
+        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"A new risk has been reported."));
         notification.setUser(manager);
         notification.setPriority(priority); // Rủi ro thường ưu tiên cao
         notification.setIsRead(false);
@@ -93,5 +94,22 @@ public class SendNotificationUtil {
         notificationService.saveNotification(notification);
 
         sendNotificationToUser(manager.getEmail(), notification);
+    }
+
+    public void sendStatusRiskNotificationToCreater(Risk risk) {
+        if (risk == null || risk.getProject() == null || risk.getProject().getManager() == null) return;
+
+        User reporter = risk.getReportedBy();
+
+        Notification notification = new Notification();
+        notification.setTitle("Project risk has been approved");
+        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"Project risk has been approved."));
+        notification.setUser(reporter);
+        notification.setPriority(Priority.MEDIUM); // Rủi ro thường ưu tiên c
+        notification.setIsRead(false);
+
+        notificationService.saveNotification(notification);
+
+        sendNotificationToUser(reporter.getEmail(), notification);
     }
 }
