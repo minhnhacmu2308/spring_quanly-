@@ -91,10 +91,6 @@
             <div class="table-responsive datatable-custom">
                 <table id="datatable" class="table table-lg table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
                        data-hs-datatables-options='{
-         "columnDefs": [{
-            "targets": [6],
-            "orderable": false
-          }],
          "order": [],
          "info": {
            "totalQty": "#datatableWithPaginationInfoTotalQty"
@@ -108,245 +104,171 @@
        }'>
                     <thead class="thead-light">
                     <tr>
-                        <th>Reported Date</th>
-                        <th>Reported By</th>
-                        <th>Project</th>
-                        <th>Information</th>
-                        <th>Detail</th>
+                        <th>Project Name</th>
                         <th>Status</th>
-                        <th>Severity</th>
-                        <th>Approve Status</th>
+                        <th>Manager</th>
+                        <th>Field Staff</th>
+                        <th>Planner</th>
+                        <th>Accountant</th>
+                        <th>Budget</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-
-                    <tr th:each="risk, iterStat : ${risks}">
-                        <td th:text="${#temporals.format(risk.reportedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                        <td th:text="${risk.reportedBy.fullName}">John Doe</td>
-                        <td th:text="${risk.project.projectName}">Project Name</td>
-                        <td th:text="${risk.information}">Risk description</td>
+                    <tr th:each="project, iterStat : ${projects}">
+                        <td th:text="${project.projectName}">Project Name</td>
                         <td>
-                            <a th:href="${risk.filePath}" download
-                               th:text="${#strings.substring(risk.filePath, risk.filePath.lastIndexOf('/') + 1)}">
-                            </a>
-                        </td>
-                        <td>
-                            <span th:if="${risk.status.name() == 'NEW'}" >NEW</span>
-                            <span th:if="${risk.status.name() == 'INPROGRESS'}" >INPROGRESS</span>
-                            <span th:if="${risk.status.name() == 'RESOLVED'}" >RESOLVED</span>
+        <span class="legend-indicator"
+              th:classappend="'bg-' + (${project.status} == 'IN_PROGRESS' ? 'warning' : (${project.status} == 'COMPLETED' ? 'success' : 'secondary'))">
+        </span>
+                            <span th:text="${project.status}">Status</span>
                         </td>
 
-
                         <td>
-                            <span th:if="${risk.severity == 'HIGH'}" >HIGH</span>
-                            <span th:if="${risk.severity == 'MEDIUM'}" >MEDIUM</span>
-                            <span th:if="${risk.severity == 'LOW'}" >LOW</span>
-                            <span th:if="${risk.severity != 'HIGH' and risk.severity != 'MEDIUM' and risk.severity != 'LOW'}"
-                                  th:text="${risk.severity}">UNKNOWN</span>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.manager != null ? project.manager.fullName : 'N/A'}">Manager Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.manager != null ? project.manager.email : ''}">Manager Email</span>
+                            </div>
                         </td>
-                        <td th:text="${risk.approveStatus}">Risk description</td>
                         <td>
-                            <a th:if="${session.user.role.name() == 'MANAGER' and risk.approveStatus.name() == 'UNDER_REVIEW'}" class="btn btn-sm btn-info" href="javascript:;"
-                               th:attr="data-toggle='modal', data-target='#appRiskModal' + ${risk.riskId}">
-                                <i class="tio-checkmark-circle-outlined"></i> Approve
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.fieldStaff != null ? project.fieldStaff.fullName : 'N/A'}">FieldStaff Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.fieldStaff != null ? project.fieldStaff.email : ''}">FieldStaff Email</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.planner != null ? project.planner.fullName : 'N/A'}">Planner Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.planner != null ? project.planner.email : ''}">Planner Email</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.accountant != null ? project.accountant.fullName : 'N/A'}">Accountant Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.accountant != null ? project.accountant.email : ''}">Accountant Email</span>
+                            </div>
+                        </td>
+                        <td th:text="${project.budget}">Project Name</td>
+                        <td>
+                            <a class="btn btn-sm btn-info" th:href="@{'/project/detail/' + ${project.projectId}}">
+                                <i class="tio-visible"></i> Detail
                             </a>
-                            <a th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'APPROVED'}" class="btn btn-sm btn-info" href="javascript:;"
-                               th:attr="data-toggle='modal', data-target='#uppRiskModal' + ${risk.riskId}">
-                                <i class="tio-update"></i> Update Status
-                            </a>
-                            <a th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'UNDER_REVIEW'}" class="btn btn-sm btn-success" href="javascript:;"
-                               th:attr="data-toggle='modal', data-target='#editRiskModal' + ${risk.riskId}">
+
+                            <a class="btn btn-sm btn-success" href="javascript:;"
+                               th:attr="data-toggle='modal', data-target='#editProjectModal' + ${project.projectId}">
                                 <i class="tio-edit"></i> Edit
                             </a>
-                            <button th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'UNDER_REVIEW'}" class="btn btn-sm btn-danger"
-                                    th:attr="data-toggle='modal', data-target='#deleteRiskModal' + ${risk.riskId}">
+                            <button class="btn btn-sm btn-danger"
+                                    th:attr="data-toggle='modal', data-target='#deleteProjectModal' + ${project.projectId}">
                                 <i class="tio-delete"></i> Delete
                             </button>
-                            <a th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'UNDER_REVIEW'}" class="btn btn-sm btn-success" href="javascript:;"
-                               th:attr="data-toggle='modal', data-target='#sendNotification' + ${risk.riskId}">
-                                <i class="tio-edit"></i> Send notification
-                            </a>
                         </td>
+
                         <!-- Modal Chỉnh Sửa -->
-                        <div class="modal fade" th:id="'editRiskModal'+${risk.riskId}" tabindex="-1" role="dialog" aria-labelledby="editRiskModalLabel" aria-hidden="true">
+                        <!-- Modal Chỉnh Sửa -->
+                        <div class="modal fade" th:id="'editProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="editRiskModalLabel">Edit Risk</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+                                        <h5 class="modal-title">Edit Project</h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/risk/edit/{id}(id=${risk.riskId})}" method="post" id="editProjectForm" enctype="multipart/form-data">
-                                            <input type="hidden" name="id" th:value="${risk.riskId}" />
-                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
-                                                <label for="projectId">Project</label>
-                                                <select class="form-control" name="projectId" required>
-                                                    <th:block th:each="project,index : ${projects}">
-                                                        <option th:if="${project.projectId == risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}" selected></option>
-                                                        <option th:if="${project.projectId != risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}"></option>
-                                                    </th:block>
-                                                </select>
+                                        <form th:action="@{/project/edit/{id}(id=${project.projectId})}" method="post" id="editProjectForm">
+                                            <input type="hidden" name="id" th:value="${project.projectId}" />
+
+                                            <div class="form-group">
+                                                <label>Project Name</label>
+                                                <input type="text" class="form-control" th:value="${project.projectName}" name="projectName">
                                             </div>
-                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
-                                                <label for="editDescription">Information</label>
-                                                <textarea class="form-control" id="editDescription"
-                                                          th:text="${risk.information}" name="information" required></textarea>
+
+                                            <div class="form-group">
+                                                <label>Budget</label>
+                                                <input type="text" class="form-control" th:value="${project.budget}" name="budget">
                                             </div>
+
+                                            <div class="form-group">
+                                                <label>Start Date</label>
+                                                <input type="date" class="form-control" th:value="${project.startDate}" name="startDate">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>End Date</label>
+                                                <input type="date" class="form-control" th:value="${project.endDate}" name="endDate">
+                                            </div>
+
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <select class="form-control" id="riskStatus" name="status" required>
-                                                    <th:block th:if="${risk.status.name() == 'NEW'}">
-                                                        <option value="NEW" selected>New</option>
-                                                        <option value="INPROGRESS">In Progress</option>
-                                                        <option value="RESOLVED">Resolved</option>
-                                                    </th:block>
-
-                                                    <th:block th:if="${risk.status.name() == 'INPROGRESS'}">
-                                                        <option value="INPROGRESS" selected>In Progress</option>
-                                                        <option value="RESOLVED">Resolved</option>
-                                                    </th:block>
-
-                                                    <th:block th:if="${risk.status.name() == 'RESOLVED'}">
-                                                        <option value="RESOLVED" selected>Resolved</option>
-                                                    </th:block>
+                                                <select class="form-control" name="status" required>
+                                                    <option value="IN_PROGRESS" th:selected="${project.status.name() == 'IN_PROGRESS'}">In Progress</option>
+                                                    <option value="COMPLETED" th:selected="${project.status.name() == 'COMPLETED'}">Completed</option>
+                                                    <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
                                                 </select>
                                             </div>
-                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
-                                                <label>Severity</label>
-                                                <select class="form-control" id="riskSeverity" name="severity" required>
-                                                    <option value="HIGH" th:selected="${risk.severity.name() == 'HIGH'}">High</option>
-                                                    <option value="MEDIUM" th:selected="${risk.severity.name() == 'MEDIUM'}">Medium</option>
-                                                    <option value="LOW" th:selected="${risk.severity.name() == 'LOW'}">Low</option>
+
+                                            <!-- THÊM 3 dropdown chọn User -->
+                                            <div class="form-group">
+                                                <label>Planner</label>
+                                                <select class="form-control" name="planner_id" required>
+                                                    <option th:value="${project.planner.userId}"  th:text="${project.planner.fullName}" selected></option>
+                                                    <option th:each="user : ${planners}"
+                                                            th:value="${user.userId}"
+                                                            th:text="${user.fullName}">
+                                                    </option>
                                                 </select>
                                             </div>
-                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
-                                                <label for="documentFile">Risk Detail</label>
-                                                <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt">
+
+                                            <div class="form-group">
+                                                <label>Field Staff</label>
+                                                <select class="form-control" name="field_staff_id" required>
+                                                    <option th:value="${project.fieldStaff.userId}"  th:text="${project.fieldStaff.fullName}" selected></option>
+                                                    <option th:each="user : ${fieldStaffs}"
+                                                            th:value="${user.userId}"
+                                                            th:text="${user.fullName}">
+                                                    </option>
+                                                </select>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+
+                                            <div class="form-group">
+                                                <label>Accountant</label>
+                                                <select class="form-control" name="accountant_id" required>
+                                                    <option th:value="${project.accountant.userId}"  th:text="${project.accountant.fullName}" selected></option>
+                                                    <option th:each="user : ${accountants}"
+                                                            th:value="${user.userId}"
+                                                            th:text="${user.fullName}"
+                                                            th:selected="${user.userId == project.accountant.userId}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-success">Save Changes</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Send notification modal -->
-                        <div class="modal fade" th:id="'sendNotification'+${risk.riskId}" tabindex="-1" role="dialog" aria-labelledby="sendNotificationLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="sendNotificationLabel">Send Notificaiton</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form th:action="@{/user/notifications/add/{projectId}(projectId=${risk.project.projectId})}" method="post" id="editProjectForm" enctype="multipart/form-data">
-                                            <input type="hidden" name="projectId" th:value="${risk.project.projectId}" />
-                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
-                                                <label for="projectId">Project</label>
-                                                <select class="form-control" name="projectId" required>
-                                                    <th:block th:each="project,index : ${projects}">
-                                                        <option th:if="${project.projectId == risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}" selected></option>
-                                                        <option th:if="${project.projectId != risk.project.projectId}" th:value="${project.projectId}" th:text="${project.projectName}"></option>
-                                                    </th:block>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="email">Title</label>
-                                                <input type="text"  class="form-control" name="title" id="title" required>
-                                            </div>
-                                            <div class="form-group" th:if="${risk.approveStatus.name() == 'UNDER_REVIEW'}">
-                                                <label for="editDescription">Content</label>
-                                                <textarea class="form-control" id="editDescription"
-                                                          name="content" required></textarea>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="priority">Priority</label>
-                                                <select class="form-control" id="priority" name="priority" required>
-                                                    <option value="LOW">Low</option>
-                                                    <option value="MEDIUM">Medium</option>
-                                                    <option value="HIGH">High</option>
-                                                </select>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Modal upp -->
-                        <div class="modal fade" th:id="'uppRiskModal'+${risk.riskId}" tabindex="-1" role="dialog" aria-labelledby="editRiskModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editRiskModalLabel">Update Status Risk</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form th:action="@{/risk/upp/{id}(id=${risk.riskId})}" method="post">
-                                            <input type="hidden" name="id" th:value="${risk.riskId}" />
-                                            <div class="form-group">
-                                                <label>Status</label>
-                                                <select class="form-control" id="riskStatus" name="status" required>
-                                                    <th:block th:if="${risk.status.name() == 'NEW'}">
-                                                        <option value="NEW" selected>New</option>
-                                                        <option value="INPROGRESS">In Progress</option>
-                                                        <option value="RESOLVED">Resolved</option>
-                                                    </th:block>
 
-                                                    <th:block th:if="${risk.status.name() == 'INPROGRESS'}">
-                                                        <option value="INPROGRESS" selected>In Progress</option>
-                                                        <option value="RESOLVED">Resolved</option>
-                                                    </th:block>
-
-                                                    <th:block th:if="${risk.status.name() == 'RESOLVED'}">
-                                                        <option value="RESOLVED" selected>Resolved</option>
-                                                    </th:block>
-                                                </select>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Modal Xóa -->
-                        <div class="modal fade" th:id="'deleteRiskModal'+${risk.riskId}" tabindex="-1" role="dialog">
+                        <div class="modal fade" id="deleteProjectModal" th:id="'deleteProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title">Confirm Delete</h5>
                                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                                     </div>
-                                    <form th:action="@{'/risk/delete/' + ${risk.riskId}}" method="get">
+                                    <form th:action="@{'/project/delete/' + ${project.projectId}}" method="get">
                                         <div class="modal-body">
-                                            <p>Are you sure you want to delete this risk?</p>
-                                            <!--                                        <p>Risk ID : <b th:text="${risk.riskId}"></b></p>-->
+                                            <p>Are you sure you want to delete this project?</p>
+                                            <p>Project : <b th:text="${project.projectName}"></b> </p>
                                             <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Modal Approve -->
-                        <div class="modal fade" th:id="'appRiskModal'+${risk.riskId}" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Confirm Approve</h5>
-                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    </div>
-                                    <form th:action="@{'/risk/approve/' + ${risk.riskId}}" method="get">
-                                        <div class="modal-body">
-                                            <p>Are you sure you want to approve this risk?</p>
-                                            <!--                                            <p>Risk ID : <b th:text="${risk.riskId}"></b></p>-->
-                                            <button type="submit" class="btn btn-info">Yes, Approve</button>
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                         </div>
                                     </form>
