@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/risk")
+@RequestMapping("/user/risk")
 public class RiskController {
 
     @Autowired
@@ -52,7 +52,7 @@ public class RiskController {
     @Autowired
     Cloudinary cloudinary;
 
-    @GetMapping("/home")
+    @GetMapping("")
     public String listRisks(Model model,  HttpSession session) {
         User user = (User) session.getAttribute("user");
         List<Risk> risks = user.getRole() == Role.MANAGER ? riskService.getRisksByManagerId(user.getUserId()) : riskService.getRisksReportedByUser(user);
@@ -107,7 +107,7 @@ public class RiskController {
 
             redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                     messageSource.getMessage("create_success", null, Locale.getDefault()));
-            return "redirect:/risk/home";
+            return "redirect:/user/risk";
         } catch (IOException e) {
             throw new DocumentUploadException("Upload failed");
         }
@@ -119,7 +119,7 @@ public class RiskController {
         return riskService.getRiskById(id).map(risk -> {
             model.addAttribute("risk", risk);
             return "risk/form"; // Form chỉnh sửa rủi ro
-        }).orElse("redirect:/risk/home");
+        }).orElse("redirect:/user/risk");
     }
 
     @PostMapping("/edit/{id}")
@@ -133,7 +133,7 @@ public class RiskController {
         if (optionalRisk.isEmpty()) {
             redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
                     messageSource.getMessage("risk_not_found", null, Locale.getDefault()));
-            return "redirect:/risk/home";
+            return "redirect:/user/risk";
         }
         User user = (User) session.getAttribute("user");
         Long projectId = Long.parseLong(prId);
@@ -175,7 +175,7 @@ public class RiskController {
         riskService.updateRisk(id, updatedRisk);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("edit_success", null, Locale.getDefault()));
-        return "redirect:/risk/home";
+        return "redirect:/user/risk";
     }
 
     @GetMapping("/delete/{id}")
@@ -183,7 +183,7 @@ public class RiskController {
         riskService.deleteRisk(id);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("delete_success", null, Locale.getDefault()));
-        return "redirect:/risk/home";
+        return "redirect:/user/risk";
     }
 
     @GetMapping("/approve/{id}")
@@ -193,7 +193,7 @@ public class RiskController {
         sendNotificationUtil.sendStatusRiskNotificationToCreater(risk);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("approve_success", null, Locale.getDefault()));
-        return "redirect:/risk/home";
+        return "redirect:/user/risk";
     }
 
     @PostMapping("/upp/{id}")
@@ -205,7 +205,7 @@ public class RiskController {
         if (optionalRisk.isEmpty()) {
             redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
                     messageSource.getMessage("risk_not_found", null, Locale.getDefault()));
-            return "redirect:/risk/home";
+            return "redirect:/user/risk";
         }
         User user = (User) session.getAttribute("user");
         updatedRisk.setReportedBy(user);
@@ -215,6 +215,6 @@ public class RiskController {
         sendNotificationUtil.sendStatusRiskNotificationToManager(obj);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("edit_success", null, Locale.getDefault()));
-        return "redirect:/risk/home";
+        return "redirect:/user/risk";
     }
 }

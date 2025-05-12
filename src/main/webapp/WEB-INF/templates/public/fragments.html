@@ -459,6 +459,7 @@
                 console.log('Connected: ' + frame);
                 const des = '/topic/notifications/'+userEmail;
                 stompClient.subscribe(des, function (notification) {
+                    console.log(notification)
                     const content = JSON.parse(notification.body);
                     showToast(content.title, content.content, content.sentAt, content.notificationId);
                     markBellUnread();
@@ -1162,8 +1163,8 @@
                             <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER'}">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="/project/home"
-                                        title="Projects Management"
+                                        href="/user/project"
+                                        title="Projects Managemprojectent"
                                         data-placement="left"
                                 >
                                     <i class="tio-pages-outlined nav-icon"></i>
@@ -1179,7 +1180,7 @@
                             <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER' || session.user.role.name() == 'FIELD_STAFF'}">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
-                                        href="/risk/home"
+                                        href="/user/risk"
                                         title="Risks Management"
                                         data-placement="left"
                                 >

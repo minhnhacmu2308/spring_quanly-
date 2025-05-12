@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/project")
+@RequestMapping("/user/project")
 public class ProjectController {
     @Autowired
     MessageSource messageSource;
@@ -40,7 +40,7 @@ public class ProjectController {
     @Autowired
     UserService userService;
 
-    @GetMapping({"/home"})
+    @GetMapping({""})
     public String listProjects(Model model,HttpSession session) {
         User user = (User) session.getAttribute("user");
         model.addAttribute("projects", projectService.getProjectByUserAndDateNew(user));
@@ -98,7 +98,7 @@ public class ProjectController {
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("create_success", null, Locale.getDefault()));
 
-        return "redirect:/project/home";
+        return "redirect:/user/project";
     }
 
 
@@ -107,7 +107,7 @@ public class ProjectController {
         return projectService.getProjectById(id).map(project -> {
             model.addAttribute("project", project);
             return "project/form";
-        }).orElse("redirect:/project/home");
+        }).orElse("redirect:/user/project");
     }
 
     @PostMapping("/edit/{id}")
@@ -123,7 +123,7 @@ public class ProjectController {
         if (optOld.isEmpty()) {
             redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
                     messageSource.getMessage("project_not_found", null, Locale.getDefault()));
-            return "redirect:/project/home";
+            return "redirect:/user/project";
         }
 
         /* ---------- Resolve users ---------- */
@@ -150,7 +150,7 @@ public class ProjectController {
 
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("edit_success", null, Locale.getDefault()));
-        return "redirect:/project/home";
+        return "redirect:/user/project";
     }
 
 
@@ -168,8 +168,8 @@ public class ProjectController {
                     project.getProjectName(), role));
             n.setUser(oldUser);
             n.setPriority(Priority.LOW);
-            sendNotificationUtil.sendNotificationToUser(oldUser.getEmail(), n);
             notificationService.saveNotification(n);
+            sendNotificationUtil.sendNotificationToUser(oldUser.getEmail(), n);
         }
 
         // 2️⃣ newly assigned?
@@ -180,8 +180,8 @@ public class ProjectController {
                     .buildProjectNotificationContent(project, role));
             n.setUser(newUser);
             n.setPriority(Priority.LOW);
-            sendNotificationUtil.sendNotificationToUser(newUser.getEmail(), n);
             notificationService.saveNotification(n);
+            sendNotificationUtil.sendNotificationToUser(newUser.getEmail(), n);
         }
     }
 
@@ -193,7 +193,7 @@ public class ProjectController {
 
         if (opt.isEmpty()) {
             redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE, "Project not found!");
-            return "redirect:/project/home";
+            return "redirect:/user/project";
         }
 
         Project project = opt.get();
@@ -208,7 +208,7 @@ public class ProjectController {
         if (hasChildren) {
             redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
                     "This project cannot be deleted because it has related documents, risks, processes, or expenses.");
-            return "redirect:/project/home";
+            return "redirect:/user/project";
         }
 
         /* ===================================================================== */
@@ -224,7 +224,7 @@ public class ProjectController {
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("delete_success", null, Locale.getDefault()));
 
-        return "redirect:/project/home";
+        return "redirect:/user/project";
     }
 
     /* ----------------------------------------------------------------------- */
@@ -239,7 +239,7 @@ public class ProjectController {
                 project.getProjectName()));
         n.setUser(user);
         n.setPriority(Priority.MEDIUM);
-
+        notificationService.saveNotification(n);
         sendNotificationUtil.sendNotificationToUser(user.getEmail(), n);
     }
 }
