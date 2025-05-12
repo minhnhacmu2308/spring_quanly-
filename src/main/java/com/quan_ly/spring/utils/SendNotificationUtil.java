@@ -119,7 +119,7 @@ public class SendNotificationUtil {
         String title  = "The project risk status has been updated to "+ risk.getStatus();
         Notification notification = new Notification();
         notification.setTitle("The project risk status has been updated");
-        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"The project risk status has been updated"));
+        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,title));
         notification.setUser(manager);
         notification.setPriority(Priority.MEDIUM); // Rủi ro thường ưu tiên c
         notification.setIsRead(false);

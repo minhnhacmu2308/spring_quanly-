@@ -211,7 +211,8 @@ public class RiskController {
         updatedRisk.setReportedBy(user);
         updatedRisk.setUpdatedAt(LocalDateTime.now());
         riskService.updateStatusRisk(id, updatedRisk);
-        sendNotificationUtil.sendStatusRiskNotificationToManager(updatedRisk);
+        Risk obj = riskService.getRiskById(id).get();
+        sendNotificationUtil.sendStatusRiskNotificationToManager(obj);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("edit_success", null, Locale.getDefault()));
         return "redirect:/risk/home";
