@@ -100,10 +100,9 @@ public class SendNotificationUtil {
         if (risk == null || risk.getProject() == null || risk.getProject().getManager() == null) return;
 
         User reporter = risk.getReportedBy();
-
         Notification notification = new Notification();
         notification.setTitle("Project risk has been approved");
-        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"Project risk has been approved."));
+        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"Project risk has been approved by manager."));
         notification.setUser(reporter);
         notification.setPriority(Priority.MEDIUM); // Rủi ro thường ưu tiên c
         notification.setIsRead(false);
@@ -111,5 +110,22 @@ public class SendNotificationUtil {
         notificationService.saveNotification(notification);
 
         sendNotificationToUser(reporter.getEmail(), notification);
+    }
+
+    public void sendStatusRiskNotificationToManager(Risk risk) {
+        if (risk == null || risk.getProject() == null || risk.getProject().getManager() == null) return;
+
+        User manager = risk.getProject().getManager();
+        String title  = "The project risk status has been updated to "+ risk.getStatus();
+        Notification notification = new Notification();
+        notification.setTitle("The project risk status has been updated");
+        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"The project risk status has been updated"));
+        notification.setUser(manager);
+        notification.setPriority(Priority.MEDIUM); // Rủi ro thường ưu tiên c
+        notification.setIsRead(false);
+
+        notificationService.saveNotification(notification);
+
+        sendNotificationToUser(manager.getEmail(), notification);
     }
 }
