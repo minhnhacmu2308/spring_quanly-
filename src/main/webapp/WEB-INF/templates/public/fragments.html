@@ -460,8 +460,7 @@
                 const des = '/topic/notifications/'+userEmail;
                 stompClient.subscribe(des, function (notification) {
                     const content = JSON.parse(notification.body);
-                    console.log("hihi")
-                    showToast(content.title, content.content, content.sentAt);
+                    showToast(content.title, content.content, content.sentAt, content.notificationId);
                     markBellUnread();
                 });
             });
@@ -581,34 +580,40 @@
 
     </script>
     <script>
-      function showToast(title, content, sentAt){
-          const container=document.getElementById("customToastContainer");
-          console.log(container);
-          if(!container) return;
+      function showToast(title, content, sentAt, notificationId) {
+        const container = document.getElementById("customToastContainer");
+        if (!container) return;
 
-          const toast=document.createElement("div");
-          toast.className="custom-toast-notification";
+        const toast = document.createElement("div");
+        toast.className = "custom-toast-notification";
+        toast.style.cursor = "pointer"; // Để hiện dấu tay khi rê chuột
 
-          const icon=`<div class="toast-icon">🔔</div>`; /* use 🛎️, 🔔, or SVG */
+        const icon = `<div class="toast-icon">🔔</div>`;
+        const timeStr = new Date(sentAt).toLocaleString();
 
-          const timeStr=new Date(sentAt).toLocaleString();
+        toast.innerHTML = `
+          ${icon}
+          <div class="toast-text">
+              <div class="toast-title">${title}</div>
+              <div class="toast-time">${timeStr}</div>
+          </div>
+        `;
 
-          toast.innerHTML=`
-              ${icon}
-              <div class="toast-text">
-                  <div class="toast-title">${title}</div>
-                  <div class="toast-body">${content}</div>
-                  <div class="toast-time">${timeStr}</div>
-              </div>
-          `;
+        // Gắn sự kiện click
+        toast.addEventListener("click", () => {
+          window.location.href = `/user/notifications/detail/${notificationId}`;
+        });
 
-          container.appendChild(toast);
+        container.appendChild(toast);
 
-          /* auto‑dismiss after 8 s */
-          setTimeout(()=>{toast.classList.add("toast-hide");
-              setTimeout(()=>toast.remove(),400);},6000);
+        // Tự động biến mất sau 6s
+        setTimeout(() => {
+          toast.classList.add("toast-hide");
+          setTimeout(() => toast.remove(), 400);
+        }, 6000);
       }
     </script>
+
 
 
     <!-- IE Support -->
