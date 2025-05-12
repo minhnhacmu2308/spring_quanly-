@@ -14,15 +14,12 @@
         <div class="page-header">
             <div class="row align-items-end">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title">
-                        <span th:if="${session.user.role.name() == 'MANAGER'}">Risks Management</span>
-                        <span th:unless="${session.user.role.name() == 'MANAGER'}">Report Risks</span>
-                    </h1>
+                    <h1 class="page-header-title">Projects Management</h1>
                 </div>
 
                 <div class="col-sm-auto">
-                    <button th:if="${session.user.role.name() == 'FIELD_STAFF'}" class="btn btn-primary" data-toggle="modal" data-target="#addRiskModal">
-                        <i class="tio-add mr-1"></i> Add Risk
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#addProjectModal">
+                        <i class="tio-add mr-1"></i> Add Project
                     </button>
                 </div>
             </div>
@@ -65,15 +62,15 @@
                                 <div id="usersExportDropdown" class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
                                     <span class="dropdown-header">Download options</span>
                                     <a id="export-excel" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\excel.svg" alt="Image Description">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\excel.svg" alt="">
                                         Excel
                                     </a>
                                     <a id="export-csv" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\components\placeholder-csv-format.svg" alt="Image Description">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\components\placeholder-csv-format.svg" alt="">
                                         .CSV
                                     </a>
                                     <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\pdf.svg" alt="Image Description">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2" src="assets\svg\brands\pdf.svg" alt="">
                                         PDF
                                     </a>
                                 </div>
@@ -329,49 +326,72 @@
     <!-- End Content -->
 
     <!--Modal Add Project-->
-    <div class="modal fade" id="addRiskModal" tabindex="-1" role="dialog" aria-labelledby="addRiskModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addRiskModalLabel">Add New Risk</h5>
+                    <h5 class="modal-title" id="addProjectModalLabel">Add New Project</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form th:action="@{/risk/create}" method="post" enctype="multipart/form-data">
+                    <form th:action="@{/project/create}" method="post" id="projectForm" >
                         <div class="form-group">
-                            <label for="projectId">Project</label>
-                            <select class="form-control" name="projectId" required>
-                                <option value="" selected>Choose a project</option>
-                                <th:block th:each="project,index : ${projects}">
-                                    <option th:value="${project.projectId}" th:text="${project.projectName}"></option>
+                            <label for="projectName">Project Name</label>
+                            <input type="text" class="form-control" id="projectName" name="projectName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fieldStaffId">Field Staff</label>
+                            <select class="form-control" id="fieldStaffId" name="field_staff_id" required>
+                                <th:block th:each="user,index : ${fieldStaffs}">
+                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
                                 </th:block>
                             </select>
+                            <small class="text-danger" id="fieldStaffError"></small>
                         </div>
+
                         <div class="form-group">
-                            <label for="description">Information</label>
-                            <textarea class="form-control" id="description" name="information" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select class="form-control" id="status" name="status" required>
-                                <option value="NEW">New</option>
-                                <option value="INPROGRESS">Inprogress</option>
-                                <option value="RESOLVED">Resolved</option>
+                            <label for="plannerId">Planner</label>
+                            <select class="form-control" id="plannerId" name="planner_id" required>
+                                <th:block th:each="user,index : ${planners}">
+                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                </th:block>
                             </select>
+                            <small class="text-danger" id="plannerError"></small>
                         </div>
+
                         <div class="form-group">
-                            <label for="severity">Severity</label>
-                            <select class="form-control" id="severity" name="severity" required>
-                                <option value="LOW">Low</option>
-                                <option value="MEDIUM">Medium</option>
-                                <option value="HIGH">High</option>
+                            <label for="accountantId">Accountant</label>
+                            <select class="form-control" id="accountantId" name="accountant_id" required>
+                                <th:block th:each="user,index : ${accountants}">
+                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                </th:block>
                             </select>
+                            <small class="text-danger" id="accountantError"></small>
                         </div>
                         <div class="form-group">
-                            <label for="documentFile">Risk Detail</label>
-                            <input type="file" name="file" class="form-control-file" id="documentFile" accept=".doc,.docx,.pdf, .txt" required>
+                            <label for="budget">Budget</label>
+                            <input type="text" class="form-control" id="budget" name="budget" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" name="startDate" required>
+                            <div id="startDateError" class="text-danger small"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" class="form-control" id="endDate" name="endDate" required>
+                            <div id="endDateError" class="text-danger small"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="projectStatus">Status</label>
+                            <select class="form-control" id="projectStatus" name="status" required>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="ON_HOLD">On Hold</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
