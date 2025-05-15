@@ -32,6 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             SELECT DISTINCT p.planner.userId FROM Project p WHERE p.endDate > :now AND p.planner IS NOT NULL
             UNION
             SELECT DISTINCT p.accountant.userId FROM Project p WHERE p.endDate > :now AND p.accountant IS NOT NULL
+            UNION
+            SELECT DISTINCT p.riskSolver.userId FROM Project p WHERE p.endDate > :now AND p.riskSolver IS NOT NULL
         )
     """)
     List<User> findByRoleAndNotInActiveProjects(@Param("role") Role role, @Param("now") LocalDate now);

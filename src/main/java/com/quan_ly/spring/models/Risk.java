@@ -21,7 +21,7 @@ public class Risk {
     private Long riskId;
 
     @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
     private Project project;
 
     @ManyToOne
@@ -31,11 +31,18 @@ public class Risk {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String information;
 
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String solution;
+
     @Enumerated(EnumType.STRING)
     private RiskStatus status = RiskStatus.NEW; // NEW, UNDER_REVIEW, RESOLVED
 
     @Enumerated(EnumType.STRING)
     private Severity severity; // LOW, MEDIUM, HIGH
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private CategoryRisk categoryRisk; // Loại rủi ro
 
     @Enumerated(EnumType.STRING)
     private ApproveStatus approveStatus = ApproveStatus.UNDER_REVIEW;

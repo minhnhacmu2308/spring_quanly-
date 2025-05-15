@@ -58,6 +58,8 @@
 
                     <dt class="col-sm-5">Accountant Name:</dt>
                     <dd class="col-sm-7" th:text="${project.accountant.fullName}"></dd>
+                    <dt class="col-sm-5">Risk Solver Name:</dt>
+                    <dd class="col-sm-7" th:text="${project.riskSolver.fullName}"></dd>
                 </dl>
             </div>
         </div>
@@ -96,8 +98,10 @@
             <tr>
                 <th>Reporter</th>
                 <th>Information</th>
+                <th>Solution</th>
                 <th>Severity</th>
                 <th>Status</th>
+                <th>Category Risk</th>
                 <th>Approval</th>
                 <th>Reported At</th>
                 <th>Last Updated</th>
@@ -108,8 +112,10 @@
             <tr th:each="risk : ${project.risks}">
                 <td th:text="${risk.reportedBy.fullName}"></td>
                 <td th:text="${risk.information}"></td>
+                <td th:text="${risk.solution}"></td>
                 <td th:text="${risk.severity}"></td>
                 <td th:text="${risk.status}"></td>
+                <td th:text="${risk.categoryRisk.name}"></td>
                 <td th:text="${risk.approveStatus}"></td>
                 <td th:text="${#temporals.format(risk.reportedAt, 'dd/MM/yyyy HH:mm')}"></td>
                 <td th:text="${#temporals.format(risk.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>

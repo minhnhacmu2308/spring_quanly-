@@ -1,14 +1,15 @@
 package com.quan_ly.spring.controllers;
 
 import com.quan_ly.spring.constants.CommonConstant;
+import com.quan_ly.spring.enums.ApproveStatus;
 import com.quan_ly.spring.enums.Priority;
 import com.quan_ly.spring.enums.Role;
-import com.quan_ly.spring.models.Notification;
-import com.quan_ly.spring.models.Project;
-import com.quan_ly.spring.models.Expense;
-import com.quan_ly.spring.models.User;
+import com.quan_ly.spring.enums.Severity;
+import com.quan_ly.spring.models.*;
+import com.quan_ly.spring.repositories.CategoryRiskRepository;
 import com.quan_ly.spring.services.NotificationService;
 import com.quan_ly.spring.services.ProjectService;
+import com.quan_ly.spring.services.RiskService;
 import com.quan_ly.spring.services.UserService;
 import com.quan_ly.spring.utils.SendNotificationUtil;
 import jakarta.servlet.http.HttpSession;
@@ -21,8 +22,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/user/project")
@@ -40,6 +41,12 @@ public class ProjectController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    CategoryRiskRepository categoryRiskRepository;
+
+    @Autowired
+    RiskService riskService;
+
     @GetMapping({""})
     public String listProjects(Model model,HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -47,6 +54,8 @@ public class ProjectController {
         model.addAttribute("fieldStaffs", userService.findByRoleAndNotInActiveProjects(Role.FIELD_STAFF, LocalDate.now()));
         model.addAttribute("planners", userService.findByRoleAndNotInActiveProjects(Role.PLANNER, LocalDate.now()));
         model.addAttribute("accountants", userService.findByRoleAndNotInActiveProjects(Role.ACCOUNTANT, LocalDate.now()));
+        model.addAttribute("riskSolvers", userService.findByRoleAndNotInActiveProjects(Role.RISK_SOLVER, LocalDate.now()));
+
         return "public/project";
     }
 
@@ -77,23 +86,40 @@ public class ProjectController {
                                 HttpSession session,
                                 @RequestParam("planner_id") Long planner_id,
                                 @RequestParam("field_staff_id") Long field_staff_id,
-                                @RequestParam("accountant_id") Long accountant_id) {
+                                @RequestParam("accountant_id") Long accountant_id,
+                                @RequestParam("riskSolver_id") Long riskSolver_id) {
 
         User manager = (User) session.getAttribute("user");
         User fieldStaff = userService.getUserById(field_staff_id).orElse(null);
         User planner = userService.getUserById(planner_id).orElse(null);
         User accountant = userService.getUserById(accountant_id).orElse(null);
+        User riskSolver = userService.getUserById(riskSolver_id).orElse(null);
 
         project.setManager(manager);
         project.setFieldStaff(fieldStaff);
         project.setPlanner(planner);
         project.setAccountant(accountant);
+        project.setRiskSolver(riskSolver);
         projectService.createProject(project);
+
+        List<Risk> risks = project.getRisks();
+        if (risks != null && !risks.isEmpty()) {
+            CategoryRisk categoryRisk = categoryRiskRepository.findByName("Foreseeable Risk").get();
+            for (Risk risk : risks) {
+                risk.setCategoryRisk(categoryRisk);
+                risk.setProject(project);
+                risk.setApproveStatus(ApproveStatus.APPROVED);
+                risk.setSeverity(Severity.LOW);
+                risk.setReportedBy(manager);
+                riskService.createRisk(risk);
+            }
+        }
 
         // Send notifications to 3 assigned users
         sendNotificationUtil.sendNotificationToAssignee(fieldStaff, "Field Staff", project);
         sendNotificationUtil.sendNotificationToAssignee(planner, "Planner", project);
         sendNotificationUtil.sendNotificationToAssignee(accountant, "Accountant", project);
+        sendNotificationUtil.sendNotificationToAssignee(riskSolver, "Risk Solver", project);
 
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("create_success", null, Locale.getDefault()));
@@ -115,9 +141,10 @@ public class ProjectController {
                                 @ModelAttribute("project") Project updatedProject,
                                 RedirectAttributes redirectAttributes,
                                 HttpSession session,
-                                @RequestParam("planner_id")   Long plannerId,
+                                @RequestParam("planner_id") Long plannerId,
                                 @RequestParam("field_staff_id") Long fieldStaffId,
-                                @RequestParam("accountant_id")  Long accountantId) {
+                                @RequestParam("accountant_id") Long accountantId,
+                                @RequestParam("riskSolver_id") Long riskSolver_id) {
 
         Optional<Project> optOld = projectService.getProjectById(id);
         if (optOld.isEmpty()) {
@@ -131,20 +158,58 @@ public class ProjectController {
         User newPlanner  = userService.getUserById(plannerId).orElse(null);
         User newField    = userService.getUserById(fieldStaffId).orElse(null);
         User newAccount  = userService.getUserById(accountantId).orElse(null);
+        User newRiskSolver  = userService.getUserById(riskSolver_id).orElse(null);
 
-        Project old = optOld.get();                                    // <‑‑ old snapshot
+        Project old = optOld.get(); // old snapshot
 
         /* ---------- Detect changes & notify ---------- */
-        handleAssigneeChange(old.getPlanner(),   newPlanner,  "Planner",    old);
-        handleAssigneeChange(old.getFieldStaff(),newField,    "Field Staff",old);
-        handleAssigneeChange(old.getAccountant(),newAccount,  "Accountant", old);
+        handleAssigneeChange(old.getPlanner(),    newPlanner,  "Planner",     old);
+        handleAssigneeChange(old.getFieldStaff(), newField,    "Field Staff", old);
+        handleAssigneeChange(old.getAccountant(), newAccount,  "Accountant",  old);
+        handleAssigneeChange(old.getRiskSolver(), newRiskSolver,  "Risk Solver",  old);
+        List<Risk> updatedRisks = Optional.ofNullable(updatedProject.getRisks()).orElse(Collections.emptyList());
+        List<Long> riskIds = updatedRisks.stream()
+                .map(Risk::getRiskId)
+                .collect(Collectors.toList());
 
-        /* ---------- persist update ---------- */
+        List<Risk> risks = optOld.get().getRisks().stream()
+                .filter(r -> riskIds.contains(r.getRiskId()))
+                .collect(Collectors.toList());
+
+        risks.forEach(oldRisk ->
+                updatedRisks.stream()
+                        .filter(updated -> Objects.equals(updated.getRiskId(), oldRisk.getRiskId()))
+                        .findFirst()
+                        .ifPresent(updated -> {
+                            oldRisk.setInformation(updated.getInformation());
+                            oldRisk.setSolution(updated.getSolution());
+                        })
+        );
+
+
+        /* ---------- Filter risks: only keep categoryRiskId == 1 ---------- */
+//        if (updatedProject.getRisks() != null) {
+//            for(long i = 0 ; i< old.getRisks().size() ; i++){
+//                for(long j = 0 ; j < updatedProject.getRisks().size() ; j++){
+//                    if(old.getRisks().get(i).get)
+//                }
+//            }
+////            List<Risk> filteredRisks = updatedProject.getRisks().stream()
+////                    .filter(risk -> risk.getCategoryRisk()!= null && risk.getCategoryRisk().getId() == 1)
+////                    .collect(Collectors.toList());
+//            updatedProject.setRisks(updatedProject.getRisks());
+//        }
+
+
+
+        /* ---------- Persist update ---------- */
         updatedProject.setProjectId(id);
         updatedProject.setManager(manager);
         updatedProject.setPlanner(newPlanner);
         updatedProject.setFieldStaff(newField);
         updatedProject.setAccountant(newAccount);
+        updatedProject.setRiskSolver(newRiskSolver);
+        updatedProject.setRisks(risks);
 
         projectService.updateProject(id, updatedProject);
 
@@ -152,7 +217,6 @@ public class ProjectController {
                 messageSource.getMessage("edit_success", null, Locale.getDefault()));
         return "redirect:/user/project";
     }
-
 
     private void handleAssigneeChange(User oldUser,
                                       User newUser,

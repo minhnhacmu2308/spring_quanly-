@@ -107,6 +107,7 @@
                         <th>Field Staff</th>
                         <th>Planner</th>
                         <th>Accountant</th>
+                        <th>Risk Solver</th>
                         <th>Budget</th>
                         <th>Actions</th>
                     </tr>
@@ -153,6 +154,14 @@
                                       th:text="${project.accountant != null ? project.accountant.email : ''}">Accountant Email</span>
                             </div>
                         </td>
+                        <td>
+                            <div>
+                <span class="d-block h5 text-hover-primary mb-0"
+                      th:text="${project.riskSolver != null ? project.riskSolver.fullName : 'N/A'}">Risk Solver Name</span>
+                                <span class="d-block font-size-sm text-body"
+                                      th:text="${project.riskSolver != null ? project.riskSolver.email : ''}">Risk Solver Email</span>
+                            </div>
+                        </td>
                         <td th:text="${project.budget}">Project Name</td>
                         <td>
                             <a class="btn btn-sm btn-info" th:href="@{'/user/project/detail/' + ${project.projectId}}">
@@ -172,86 +181,173 @@
                         <!-- Modal Chỉnh Sửa -->
                         <!-- Modal Chỉnh Sửa -->
                         <div class="modal fade" th:id="'editProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
+                            <div class="modal-dialog modal-lg" role="document"> <!-- rộng hơn -->
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title">Edit Project</h5>
                                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/user/project/edit/{id}(id=${project.projectId})}" method="post" id="editProjectForm">
+                                        <form th:action="@{/user/project/edit/{id}(id=${project.projectId})}" method="post">
                                             <input type="hidden" name="id" th:value="${project.projectId}" />
+                                            <div class="row">
+                                                <!-- Cột trái -->
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Project Name</label>
+                                                        <input type="text" class="form-control" th:value="${project.projectName}" name="projectName" required>
+                                                    </div>
 
-                                            <div class="form-group">
-                                                <label>Project Name</label>
-                                                <input type="text" class="form-control" th:value="${project.projectName}" name="projectName">
+                                                    <div class="form-group">
+                                                        <label>Field Staff</label>
+                                                        <select class="form-control" name="field_staff_id" required>
+                                                            <option th:value="${project.fieldStaff.userId}" th:text="${project.fieldStaff.fullName}" selected></option>
+                                                            <option th:each="user : ${fieldStaffs}" th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Planner</label>
+                                                        <select class="form-control" name="planner_id" required>
+                                                            <option th:value="${project.planner.userId}" th:text="${project.planner.fullName}" selected></option>
+                                                            <option th:each="user : ${planners}" th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Accountant</label>
+                                                        <select class="form-control" name="accountant_id" required>
+                                                            <option th:value="${project.accountant.userId}" th:text="${project.accountant.fullName}" selected></option>
+                                                            <option th:each="user : ${accountants}" th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Risk Solver</label>
+                                                        <select class="form-control" name="riskSolver_id" required>
+                                                            <option th:value="${project.riskSolver.userId}" th:text="${project.riskSolver.fullName}" selected></option>
+                                                            <option th:each="user : ${riskSolvers}" th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Cột phải -->
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Budget</label>
+                                                        <input type="text" class="form-control" th:value="${project.budget}" name="budget" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Start Date</label>
+                                                        <input type="date" class="form-control" th:value="${project.startDate}" name="startDate" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>End Date</label>
+                                                        <input type="date" class="form-control" th:value="${project.endDate}" name="endDate" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Status</label>
+                                                        <select class="form-control" name="status" required>
+                                                            <option value="IN_PROGRESS" th:selected="${project.status.name() == 'IN_PROGRESS'}">In Progress</option>
+                                                            <option value="COMPLETED" th:selected="${project.status.name() == 'COMPLETED'}">Completed</option>
+                                                            <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Project Risks</label>
+                                                        <div th:id="'risks-container-' + ${project.projectId}">
+                                                            <th:block th:each="risk, iterStat : ${project.risks}">
+                                                                <th:block th:if="${risk.categoryRisk.id == 1}">
+                                                                    <div class="risk-item mb-2 d-flex flex-column flex-md-row gap-2 align-items-start"
+                                                                         th:attr="data-index=${iterStat.index}">
+                                                                        <div class="flex-grow-1">
+                                                                            <input type="text"
+                                                                                   class="form-control mb-1"
+                                                                                   th:name="'risks[' + ${iterStat.index} + '].information'"
+                                                                                   th:value="${risk.information}"
+                                                                                   placeholder="Risk information"
+                                                                                   required />
+                                                                            <textarea class="form-control mb-1"
+                                                                                      th:name="'risks[' + ${iterStat.index} + '].solution'"
+                                                                                      th:text="${risk.solution}"
+                                                                                      placeholder="Solution"></textarea>
+                                                                            <input type="hidden"
+                                                                                   th:name="'risks[' + ${iterStat.index} + '].riskId'"
+                                                                                   th:value="${risk.riskId}" />
+                                                                        </div>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger btn-xs p-1 px-2 mt-md-0 mt-1"
+                                                                                style="font-size: 0.75rem; line-height: 1;"
+                                                                                onclick="removeRisk(this)">
+                                                                            &times;
+                                                                        </button>
+                                                                    </div>
+                                                                </th:block>
+                                                            </th:block>
+                                                        </div>
+<!--                                                        <button type="button" class="btn btn-secondary btn-sm mt-2"-->
+<!--                                                                th:attr="onclick=|addRiskToEdit(${project.projectId})|">+</button>-->
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="form-group">
-                                                <label>Budget</label>
-                                                <input type="text" class="form-control" th:value="${project.budget}" name="budget">
+                                            <div class="text-right">
+                                                <button type="submit" class="btn btn-success mt-3">Save Changes</button>
                                             </div>
-
-                                            <div class="form-group">
-                                                <label>Start Date</label>
-                                                <input type="date" class="form-control" th:value="${project.startDate}" name="startDate">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>End Date</label>
-                                                <input type="date" class="form-control" th:value="${project.endDate}" name="endDate">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Status</label>
-                                                <select class="form-control" name="status" required>
-                                                    <option value="IN_PROGRESS" th:selected="${project.status.name() == 'IN_PROGRESS'}">In Progress</option>
-                                                    <option value="COMPLETED" th:selected="${project.status.name() == 'COMPLETED'}">Completed</option>
-                                                    <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
-                                                </select>
-                                            </div>
-
-                                            <!-- THÊM 3 dropdown chọn User -->
-                                            <div class="form-group">
-                                                <label>Planner</label>
-                                                <select class="form-control" name="planner_id" required>
-                                                    <option th:value="${project.planner.userId}"  th:text="${project.planner.fullName}" selected></option>
-                                                    <option th:each="user : ${planners}"
-                                                            th:value="${user.userId}"
-                                                            th:text="${user.fullName}">
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Field Staff</label>
-                                                <select class="form-control" name="field_staff_id" required>
-                                                    <option th:value="${project.fieldStaff.userId}"  th:text="${project.fieldStaff.fullName}" selected></option>
-                                                    <option th:each="user : ${fieldStaffs}"
-                                                            th:value="${user.userId}"
-                                                            th:text="${user.fullName}">
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Accountant</label>
-                                                <select class="form-control" name="accountant_id" required>
-                                                    <option th:value="${project.accountant.userId}"  th:text="${project.accountant.fullName}" selected></option>
-                                                    <option th:each="user : ${accountants}"
-                                                            th:value="${user.userId}"
-                                                            th:text="${user.fullName}"
-                                                            th:selected="${user.userId == project.accountant.userId}">
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <button type="submit" class="btn btn-success">Save Changes</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <script>
+                            function removeRisk(btn) {
+                                const container = btn.closest('.form-group').querySelector('[id^="risks-container-"]');
+                                btn.closest('.risk-item').remove();
+
+                                const riskItems = container.querySelectorAll('.risk-item');
+                                riskItems.forEach((item, index) => {
+                                    item.setAttribute('data-index', index);
+                                    item.querySelectorAll('[name]').forEach(input => {
+                                        const name = input.getAttribute('name');
+                                        if (name) {
+                                            const newName = name.replace(/risks\[\d+\]/, `risks[${index}]`);
+                                            input.setAttribute('name', newName);
+                                        }
+                                    });
+                                });
+                            }
+
+
+                            function addRiskToEdit(projectId) {
+                                const container = document.getElementById(`risks-container-${projectId}`);
+                                const index = container.querySelectorAll('.risk-item').length;
+
+                                const newRiskHTML = `
+                                    <div class="risk-item mb-2 d-flex flex-column flex-md-row gap-2 align-items-start" data-index="${index}">
+                                        <div class="flex-grow-1">
+                                            <input type="text" class="form-control mb-1"
+                                                   name="risks[${index}].information"
+                                                   placeholder="Risk information" required />
+                                            <textarea class="form-control mb-1"
+                                                      name="risks[${index}].solution"
+                                                      placeholder="Solution"></textarea>
+                                            <input type="hidden" name="risks[${index}].categoryRisk.id" value="1" />
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-xs p-1 px-2 mt-md-0 mt-1"
+                                                style="font-size: 0.75rem; line-height: 1;"
+                                                onclick="removeRisk(this)">
+                                            &times;
+                                        </button>
+                                    </div>
+                                `;
+
+                                container.insertAdjacentHTML('beforeend', newRiskHTML);
+                            }
+</script>
 
                         <!-- Modal Xóa -->
                         <div class="modal fade" id="deleteProjectModal" th:id="'deleteProjectModal'+${project.projectId}" tabindex="-1" role="dialog">
@@ -326,79 +422,167 @@
     <!-- End Content -->
 
     <!--Modal Add Project-->
+    <!-- Modal rộng ra -->
+    <!-- Modal rộng ra -->
+    <!-- Modal -->
     <div class="modal fade" id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document"> <!-- rộng hơn -->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addProjectModalLabel">Add New Project</h5>
+                    <h5 class="modal-title">Add New Project</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span>&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form th:action="@{/user/project/create}" method="post" id="projectForm" >
-                        <div class="form-group">
-                            <label for="projectName">Project Name</label>
-                            <input type="text" class="form-control" id="projectName" name="projectName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="fieldStaffId">Field Staff</label>
-                            <select class="form-control" id="fieldStaffId" name="field_staff_id" required>
-                                <th:block th:each="user,index : ${fieldStaffs}">
-                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
-                                </th:block>
-                            </select>
-                            <small class="text-danger" id="fieldStaffError"></small>
+                    <form th:action="@{/user/project/create}" method="post" id="projectForm">
+                        <div class="row">
+                            <!-- Cột trái -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="projectName">Project Name</label>
+                                    <input type="text" class="form-control" id="projectName" name="projectName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fieldStaffId">Field Staff</label>
+                                    <select class="form-control" id="fieldStaffId" name="field_staff_id" required>
+                                        <th:block th:each="user,index : ${fieldStaffs}">
+                                            <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                        </th:block>
+                                    </select>
+                                    <small class="text-danger" id="fieldStaffError"></small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="plannerId">Planner</label>
+                                    <select class="form-control" id="plannerId" name="planner_id" required>
+                                        <th:block th:each="user,index : ${planners}">
+                                            <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                        </th:block>
+                                    </select>
+                                    <small class="text-danger" id="plannerError"></small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="accountantId">Accountant</label>
+                                    <select class="form-control" id="accountantId" name="accountant_id" required>
+                                        <th:block th:each="user,index : ${accountants}">
+                                            <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                        </th:block>
+                                    </select>
+                                    <small class="text-danger" id="accountantError"></small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="accountantId">Risk Solver</label>
+                                    <select class="form-control" id="riskSolverId" name="riskSolver_id" required>
+                                        <th:block th:each="user,index : ${riskSolvers}">
+                                            <option th:value="${user.userId}" th:text="${user.fullName}"></option>
+                                        </th:block>
+                                    </select>
+                                    <small class="text-danger" id="accountantError"></small>
+                                </div>
+                            </div>
+
+                            <!-- Cột phải -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="budget">Budget</label>
+                                    <input type="text" class="form-control" id="budget" name="budget" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="startDate">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
+                                    <div class="text-danger small" id="startDateError"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="endDate">End Date</label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" required>
+                                    <div class="text-danger small" id="endDateError"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectStatus">Status</label>
+                                    <select class="form-control" id="projectStatus" name="status" required>
+                                        <option value="IN_PROGRESS">In Progress</option>
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="ON_HOLD">On Hold</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Project Risks</label>
+                                    <div id="risks-container">
+                                        <div class="risk-item mb-2 d-flex flex-column flex-md-row gap-2 align-items-start" data-index="0">
+                                            <div class="flex-grow-1">
+                                                <input type="text" class="form-control mb-1" name="risks[0].information" placeholder="Risk information" required />
+                                                <textarea class="form-control mb-1" name="risks[0].solution" placeholder="Solution"></textarea>
+                                            </div>
+                                            <button type="button"
+                                                    class="btn btn-outline-danger btn-xs p-1 px-2 mt-md-0 mt-1"
+                                                    style="font-size: 0.75rem; line-height: 1;"
+                                                    onclick="removeRisk(this)">
+                                                &times;
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addRisk()">+</button>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="plannerId">Planner</label>
-                            <select class="form-control" id="plannerId" name="planner_id" required>
-                                <th:block th:each="user,index : ${planners}">
-                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
-                                </th:block>
-                            </select>
-                            <small class="text-danger" id="plannerError"></small>
-                        </div>
+                        <!-- Risks -->
 
-                        <div class="form-group">
-                            <label for="accountantId">Accountant</label>
-                            <select class="form-control" id="accountantId" name="accountant_id" required>
-                                <th:block th:each="user,index : ${accountants}">
-                                    <option th:value="${user.userId}" th:text="${user.fullName}"></option>
-                                </th:block>
-                            </select>
-                            <small class="text-danger" id="accountantError"></small>
-                        </div>
-                        <div class="form-group">
-                            <label for="budget">Budget</label>
-                            <input type="text" class="form-control" id="budget" name="budget" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="startDate">Start Date</label>
-                            <input type="date" class="form-control" id="startDate" name="startDate" required>
-                            <div id="startDateError" class="text-danger small"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="endDate">End Date</label>
-                            <input type="date" class="form-control" id="endDate" name="endDate" required>
-                            <div id="endDateError" class="text-danger small"></div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="projectStatus">Status</label>
-                            <select class="form-control" id="projectStatus" name="status" required>
-                                <option value="IN_PROGRESS">In Progress</option>
-                                <option value="COMPLETED">Completed</option>
-                                <option value="ON_HOLD">On Hold</option>
-                            </select>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary mt-3">Save</button>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+    let riskIndex = 1;
+
+    function addRisk() {
+        const container = document.getElementById('risks-container');
+
+        const riskItem = document.createElement('div');
+        riskItem.className = 'risk-item mb-2 d-flex flex-column flex-md-row gap-2 align-items-start';
+        riskItem.setAttribute('data-index', riskIndex);
+
+        riskItem.innerHTML = `
+            <div class="flex-grow-1">
+                <input type="text" class="form-control mb-1" name="risks[${riskIndex}].information" placeholder="Risk information" required />
+                <textarea class="form-control mb-1" name="risks[${riskIndex}].solution" placeholder="Solution"></textarea>
+            </div>
+            <button type="button"
+                    class="btn btn-outline-danger btn-xs p-1 px-2 mt-md-0 mt-1"
+                    style="font-size: 0.75rem; line-height: 1;"
+                    onclick="removeRisk(this)">
+                &times;
+            </button>
+        `;
+
+        container.appendChild(riskItem);
+        riskIndex++;
+    }
+
+    function removeRisk(button) {
+        const item = button.closest('.risk-item');
+        if (item) item.remove();
+    }
+</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal-lg {
+            max-width: 900px;
+        }
+
+        .risk-item {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+    </style>
 </main>
 <script th:src="@{/public/assets/js/demo.js}"></script>
 <script>

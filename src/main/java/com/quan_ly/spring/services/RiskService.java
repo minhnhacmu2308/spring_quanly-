@@ -18,4 +18,6 @@ public interface RiskService {
     List<Risk> getRisksReportedByUser(User user);
 
     List<Risk> getRisksByManagerId(Long managerId);
+    List<Risk> getRisksByProjectId(Long projectId);
+
 }

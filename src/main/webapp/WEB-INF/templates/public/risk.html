@@ -126,10 +126,13 @@
                         <td th:text="${risk.reportedBy.fullName}">John Doe</td>
                         <td th:text="${risk.project.projectName}">Project Name</td>
                         <td th:text="${risk.information}">Risk description</td>
-                        <td>
+                        <td th:if="${risk.filePath != null and !risk.filePath.isEmpty()}">
                             <a th:href="${risk.filePath}" download
                                th:text="${#strings.substring(risk.filePath, risk.filePath.lastIndexOf('/') + 1)}">
                             </a>
+                        </td>
+                        <td th:unless="${risk.filePath != null and !risk.filePath.isEmpty()}">
+                            No file
                         </td>
                         <td>
                             <span th:if="${risk.status.name() == 'NEW'}" >NEW</span>

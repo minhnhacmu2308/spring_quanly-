@@ -50,6 +50,10 @@ public class Project {
     @JoinColumn(name = "accountant_id")
     private User accountant;
 
+    @ManyToOne
+    @JoinColumn(name = "risk_solver_id")
+    private User riskSolver;
+
     @OneToMany(mappedBy = "project")
     private List<Document> documents;
 

@@ -1,7 +1,9 @@
 package com.quan_ly.spring.configs;
 
 import com.quan_ly.spring.enums.Role;
+import com.quan_ly.spring.models.CategoryRisk;
 import com.quan_ly.spring.models.User;
+import com.quan_ly.spring.repositories.CategoryRiskRepository;
 import com.quan_ly.spring.repositories.UserRepository;
 import com.quan_ly.spring.utils.EncrytedPasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ CommandLineRunner initDatabase(UserRepository userRepository) {
         createUserIfNotExists(userRepository, "fieldstaff@gmail.com", "Field Staff", "123456", Role.FIELD_STAFF);
         createUserIfNotExists(userRepository, "planner@gmail.com", "Planner", "123456", Role.PLANNER);
         createUserIfNotExists(userRepository, "accountant@gmail.com", "Accountant", "123456", Role.ACCOUNTANT);
+        createUserIfNotExists(userRepository, "risksolver@gmail.com", "Risk Solver", "123456", Role.RISK_SOLVER);
     };
 }
 
@@ -58,6 +61,25 @@ CommandLineRunner initDatabase(UserRepository userRepository) {
             System.out.println("✅ Created default " + role + " user with email: " + email);
         } else {
             System.out.println("ℹ️ User with email " + email + " already exists.");
+        }
+    }
+
+    @Bean
+    CommandLineRunner initCategoryRisk(CategoryRiskRepository categoryRiskRepository) {
+        return args -> {
+            createCategoryRiskIfNotExists(categoryRiskRepository, "Foreseeable Risk");
+            createCategoryRiskIfNotExists(categoryRiskRepository, "New Risk");
+        };
+    }
+
+    private void createCategoryRiskIfNotExists(CategoryRiskRepository categoryRiskRepository, String name) {
+        if (categoryRiskRepository.findByName(name).isEmpty()) {
+            CategoryRisk categoryRisk = new CategoryRisk();
+            categoryRisk.setName(name);
+            categoryRiskRepository.save(categoryRisk);
+            System.out.println("✅ Created CategoryRisk: " + name);
+        } else {
+            System.out.println("ℹ️ CategoryRisk already exists: " + name);
         }
     }
 }

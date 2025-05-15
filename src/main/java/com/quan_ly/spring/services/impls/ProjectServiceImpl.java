@@ -1,8 +1,10 @@
 package com.quan_ly.spring.services.impls;
 
 import com.quan_ly.spring.models.Project;
+import com.quan_ly.spring.models.Risk;
 import com.quan_ly.spring.models.User;
 import com.quan_ly.spring.repositories.ProjectRepository;
+import com.quan_ly.spring.repositories.RiskRepository;
 import com.quan_ly.spring.repositories.UserRepository;
 import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.utils.EncrytedPasswordUtils;
@@ -10,11 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 @Service
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
+
+    @Autowired
+    RiskRepository riskRepository;
 
     public ProjectServiceImpl(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
@@ -46,6 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
             project.setAccountant(updatedProject.getAccountant());
             project.setFieldStaff(updatedProject.getFieldStaff());
             project.setPlanner(updatedProject.getPlanner());
+            project.setRisks(updatedProject.getRisks());
             return projectRepository.save(project);
         }).orElseThrow(() -> new RuntimeException("Project not found with ID: " + id));
     }

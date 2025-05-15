@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -68,4 +70,10 @@ public class SpringWebConfig implements WebMvcConfigurer {
 
         return viewResolver;
     }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.setAutoGrowNestedPaths(true);
+    }
+
 }

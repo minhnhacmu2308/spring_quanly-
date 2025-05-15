@@ -4,10 +4,8 @@ import com.cloudinary.Cloudinary;
 import com.quan_ly.spring.constants.CommonConstant;
 import com.quan_ly.spring.enums.Role;
 import com.quan_ly.spring.exceptions.DocumentUploadException;
-import com.quan_ly.spring.models.Document;
-import com.quan_ly.spring.models.Project;
-import com.quan_ly.spring.models.Risk;
-import com.quan_ly.spring.models.User;
+import com.quan_ly.spring.models.*;
+import com.quan_ly.spring.repositories.CategoryRiskRepository;
 import com.quan_ly.spring.services.NotificationService;
 import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.RiskService;
@@ -52,6 +50,9 @@ public class RiskController {
     @Autowired
     Cloudinary cloudinary;
 
+    @Autowired
+    CategoryRiskRepository categoryRiskRepository;
+
     @GetMapping("")
     public String listRisks(Model model,  HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -93,10 +94,12 @@ public class RiskController {
 
             String fileUrl = uploadResult.get("secure_url").toString();
             User user = (User) session.getAttribute("user");
+            CategoryRisk categoryRisk = categoryRiskRepository.findByName("New Risk").get();
             risk.setFilePath(fileUrl);
             risk.setReportedBy(user);
             risk.setReportedAt(LocalDateTime.now());
             risk.setUpdatedAt(LocalDateTime.now());
+            risk.setCategoryRisk(categoryRisk);
             Long projectId = Long.parseLong(request.getParameter("projectId"));
             Project pj = projectService.getProjectById(projectId).get();
             risk.setProject(pj);
