@@ -19,4 +19,7 @@ public interface RiskRepository extends JpaRepository<Risk, Long> {
     // Lấy tất cả risk của các project có managerId cụ thể
     @Query("SELECT r FROM Risk r WHERE r.project.manager.userId = :managerId")
     List<Risk> findRisksByProjectManagerId(@Param("managerId") Long managerId);
+
+    @Query("SELECT r FROM Risk r WHERE r.project.riskSolver.userId = :riskSolverId and approveStatus = 'APPROVED'")
+    List<Risk> findRisksByProjectRiskSolverId(@Param("riskSolverId") Long riskSolverId);
 }

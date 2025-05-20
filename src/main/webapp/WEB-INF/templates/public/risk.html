@@ -112,6 +112,7 @@
                         <th>Reported By</th>
                         <th>Project</th>
                         <th>Information</th>
+                        <th>Solution</th>
                         <th>Detail</th>
                         <th>Status</th>
                         <th>Severity</th>
@@ -126,6 +127,7 @@
                         <td th:text="${risk.reportedBy.fullName}">John Doe</td>
                         <td th:text="${risk.project.projectName}">Project Name</td>
                         <td th:text="${risk.information}">Risk description</td>
+                        <td th:text="${risk.solution}">Solution</td>
                         <td th:if="${risk.filePath != null and !risk.filePath.isEmpty()}">
                             <a th:href="${risk.filePath}" download
                                th:text="${#strings.substring(risk.filePath, risk.filePath.lastIndexOf('/') + 1)}">
@@ -154,9 +156,12 @@
                                th:attr="data-toggle='modal', data-target='#appRiskModal' + ${risk.riskId}">
                                 <i class="tio-checkmark-circle-outlined"></i> Approve
                             </a>
-                            <a th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'APPROVED'}" class="btn btn-sm btn-info" href="javascript:;"
+                            <a th:if="${session.user.role.name() == 'RISK_SOLVER' and risk.approveStatus.name() == 'APPROVED' and risk.status.name() != 'RESOLVED'}" class="btn btn-sm btn-info" href="javascript:;"
                                th:attr="data-toggle='modal', data-target='#uppRiskModal' + ${risk.riskId}">
-                                <i class="tio-update"></i> Update Status
+                                <i class="tio-update"></i> Report
+                            </a>
+                            <a class="btn btn-sm btn-info" th:href="@{'/user/risk/detail/' + ${risk.riskId}}">
+                                <i class="tio-visible"></i>
                             </a>
                             <a th:if="${session.user.role.name() == 'FIELD_STAFF' and risk.approveStatus.name() == 'UNDER_REVIEW'}" class="btn btn-sm btn-success" href="javascript:;"
                                th:attr="data-toggle='modal', data-target='#editRiskModal' + ${risk.riskId}">
@@ -291,11 +296,11 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/user/risk/upp/{id}(id=${risk.riskId})}" method="post">
+                                        <form th:action="@{/user/risk/upp/{id}(id=${risk.riskId})}" method="post" enctype="multipart/form-data">
                                             <input type="hidden" name="id" th:value="${risk.riskId}" />
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <select class="form-control" id="riskStatus" name="status" required>
+                                                <select class="form-control risk-status-select" id="riskStatus__${risk.riskId}" name="status" required>
                                                     <th:block th:if="${risk.status.name() == 'NEW'}">
                                                         <option value="NEW" selected>New</option>
                                                         <option value="INPROGRESS">In Progress</option>
@@ -311,6 +316,10 @@
                                                         <option value="RESOLVED" selected>Resolved</option>
                                                     </th:block>
                                                 </select>
+                                            </div>
+                                            <div class="form-group mt-3" id="fileInputGroup" style="display: none;">
+                                                <label for="filePath">Upload Resolution File</label>
+                                                <input type="file" class="form-control" id="filePath" name="file">
                                             </div>
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
                                         </form>
@@ -362,7 +371,34 @@
 
             </div>
             <!-- End Table -->
+            <script th:inline="javascript">
+            /*<![CDATA[*/
+            $(document).ready(function () {
+                $('select.risk-status-select').on('change', function () {
+                    const selectedValue = $(this).val();
+                    const modal = $(this).closest('.modal');
+                    const fileGroup = modal.find('#fileInputGroup');
 
+                    if (selectedValue === 'RESOLVED') {
+                        fileGroup.show();
+                    } else {
+                        fileGroup.hide();
+                    }
+                });
+
+                // Nếu muốn show ô file khi status đã là RESOLVED lúc mở modal
+                $('.modal').on('shown.bs.modal', function () {
+                    const select = $(this).find('select.risk-status-select');
+                    const fileGroup = $(this).find('#fileInputGroup');
+                    if (select.val() === 'RESOLVED') {
+                        fileGroup.show();
+                    } else {
+                        fileGroup.hide();
+                    }
+                });
+            });
+            /*]]>*/
+        </script>
             <!-- Footer -->
             <div class="card-footer">
                 <!-- Pagination -->

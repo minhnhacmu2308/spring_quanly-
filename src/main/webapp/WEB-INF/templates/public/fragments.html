@@ -1177,7 +1177,7 @@
                             <!-- End Pages -->
 
                             <!-- Apps -->
-                            <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER' || session.user.role.name() == 'FIELD_STAFF'}">
+                            <li class="nav-item" th:if="${session.user.role.name() == 'MANAGER' || session.user.role.name() == 'FIELD_STAFF' || session.user.role.name() == 'RISK_SOLVER'}">
                                 <a
                                         class="js-nav-tooltip-link nav-link"
                                         href="/user/risk"
@@ -1189,10 +1189,11 @@
                                             class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
                                     >Risks Management
                       </span>
-                                    <span th:if="${session.user.role.name() == 'FIELD_STAFF'}"
-                                          class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate"
-                                    >Report Risks
-                      </span>
+                                    <span th:if="${session.user.role.name() == 'FIELD_STAFF' or session.user.role.name() == 'RISK_SOLVER'}"
+                                          class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                                        Report Risks
+                                    </span>
+
                                 </a>
                             </li>
 

@@ -112,6 +112,24 @@ public class SendNotificationUtil {
         sendNotificationToUser(reporter.getEmail(), notification);
     }
 
+    public void sendStatusRiskNotificationToResolverRisk(Risk risk) {
+        if (risk == null || risk.getProject() == null || risk.getProject().getManager() == null) return;
+
+        User riskRolver = risk.getProject().getRiskSolver();
+
+        Priority priority = Priority.valueOf(risk.getSeverity().name());
+        Notification notification = new Notification();
+        notification.setTitle("You are assigned a new risk.");
+        notification.setContent(SendNotificationUtil.buildRiskNotificationContent(risk,"You are assigned a risk by the project manager."));
+        notification.setUser(riskRolver);
+        notification.setPriority(priority); // Rủi ro thường ưu tiên c
+        notification.setIsRead(false);
+
+        notificationService.saveNotification(notification);
+
+        sendNotificationToUser(riskRolver.getEmail(), notification);
+    }
+
     public void sendStatusRiskNotificationToManager(Risk risk) {
         if (risk == null || risk.getProject() == null || risk.getProject().getManager() == null) return;
 

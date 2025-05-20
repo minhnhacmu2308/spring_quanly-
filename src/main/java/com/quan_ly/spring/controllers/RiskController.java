@@ -6,6 +6,7 @@ import com.quan_ly.spring.enums.Role;
 import com.quan_ly.spring.exceptions.DocumentUploadException;
 import com.quan_ly.spring.models.*;
 import com.quan_ly.spring.repositories.CategoryRiskRepository;
+import com.quan_ly.spring.repositories.ResolveRiskReportRepository;
 import com.quan_ly.spring.services.NotificationService;
 import com.quan_ly.spring.services.ProjectService;
 import com.quan_ly.spring.services.RiskService;
@@ -53,10 +54,13 @@ public class RiskController {
     @Autowired
     CategoryRiskRepository categoryRiskRepository;
 
+    @Autowired
+    ResolveRiskReportRepository resolveRiskReportRepository;
+
     @GetMapping("")
     public String listRisks(Model model,  HttpSession session) {
         User user = (User) session.getAttribute("user");
-        List<Risk> risks = user.getRole() == Role.MANAGER ? riskService.getRisksByManagerId(user.getUserId()) : riskService.getRisksReportedByUser(user);
+        List<Risk> risks = user.getRole() == Role.MANAGER ? riskService.getRisksByManagerId(user.getUserId()) : user.getRole() == Role.RISK_SOLVER ? riskService.getRisksByRiskSolverId(user.getUserId()) : riskService.getRisksReportedByUser(user);
         model.addAttribute("risks", risks);
         model.addAttribute("projects", projectService.getProjectByUserAndDate(user, LocalDate.now()));
         return "public/risk"; // View hiển thị danh sách rủi ro
@@ -193,6 +197,7 @@ public class RiskController {
     public String appRisk(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         riskService.appRisk(id);
         Risk risk = riskService.getRiskById(id).get();
+        sendNotificationUtil.sendStatusRiskNotificationToResolverRisk(risk);
         sendNotificationUtil.sendStatusRiskNotificationToCreater(risk);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("approve_success", null, Locale.getDefault()));
@@ -201,8 +206,9 @@ public class RiskController {
 
     @PostMapping("/upp/{id}")
     public String uppRisk(@PathVariable Long id,
-                             @ModelAttribute("risk") Risk updatedRisk,
-                             RedirectAttributes redirectAttributes, HttpSession session) {
+                         @ModelAttribute("risk") Risk updatedRisk,
+                         RedirectAttributes redirectAttributes, HttpSession session,
+                          @RequestParam(value = "file", required = false) MultipartFile file) {
 
         Optional<Risk> optionalRisk = riskService.getRiskById(id);
         if (optionalRisk.isEmpty()) {
@@ -211,13 +217,79 @@ public class RiskController {
             return "redirect:/user/risk";
         }
         User user = (User) session.getAttribute("user");
-        updatedRisk.setReportedBy(user);
+        updatedRisk.setReportedBy(optionalRisk.get().getReportedBy());
         updatedRisk.setUpdatedAt(LocalDateTime.now());
         riskService.updateStatusRisk(id, updatedRisk);
         Risk obj = riskService.getRiskById(id).get();
+        String filePath = null;
+        //xu ly file
+        if (file != null && !file.isEmpty()) {
+            try {
+                String contentType = file.getContentType();
+                String fileName = file.getOriginalFilename();
+                // Kiểm tra loại file hợp lệ
+                if (!"application/pdf".equals(contentType) &&
+                        !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType) &&
+                        !"text/plain".equals(contentType) &&
+                        !"application/zip".equals(contentType)) {
+                    throw new DocumentUploadException("Only PDF, DOCX, TXT files are accepted.");
+                }
+                // Upload file lên Cloudinary
+                Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of(
+                        "resource_type", "raw", // Giữ nguyên file
+                        "public_id", "documents/" + fileName,
+                        "use_filename", true,
+                        "unique_filename", false
+                ));
+                System.out.println(uploadResult);
+
+                filePath = uploadResult.get("secure_url").toString();
+                ResolveRiskReport resolveRiskReport = new ResolveRiskReport();
+                resolveRiskReport.setResolvedBy(user);
+                resolveRiskReport.setResolvedDate(LocalDateTime.now());
+                resolveRiskReport.setFilePath(filePath);
+                resolveRiskReport.setRisk(optionalRisk.get());
+                resolveRiskReportRepository.save(resolveRiskReport);
+
+            } catch (IOException e) {
+                throw new DocumentUploadException("Upload failed");
+            }
+        }
+
         sendNotificationUtil.sendStatusRiskNotificationToManager(obj);
         redirectAttributes.addFlashAttribute(CommonConstant.SUCCESS_MESSAGE,
                 messageSource.getMessage("edit_success", null, Locale.getDefault()));
         return "redirect:/user/risk";
     }
+
+    @GetMapping("/detail/{id}")
+    public String showRiskDetail(@PathVariable Long id, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Optional<Risk> optionalRisk = riskService.getRiskById(id);
+        if (optionalRisk.isEmpty()) {
+            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE,
+                    messageSource.getMessage("risk_not_found", null, Locale.getDefault()));
+            return "redirect:/user/risk";
+        }
+
+        Risk risk = optionalRisk.get();
+        User user = (User) session.getAttribute("user");
+
+        // Kiểm tra quyền xem chi tiết
+        boolean hasAccess = user.getRole() == Role.MANAGER && risk.getProject().getManager().getUserId().equals(user.getUserId())
+                || user.getRole() == Role.RISK_SOLVER && risk.getProject().getRiskSolver() != null && risk.getProject().getRiskSolver().getUserId().equals(user.getUserId())
+                || user.getUserId().equals(risk.getReportedBy().getUserId());
+
+        if (!hasAccess) {
+            redirectAttributes.addFlashAttribute(CommonConstant.ERROR_MESSAGE, "Bạn không có quyền xem rủi ro này.");
+            return "redirect:/user/risk";
+        }
+
+        // Lấy danh sách các lần xử lý rủi ro nếu có
+        List<ResolveRiskReport> resolveReports = resolveRiskReportRepository.findByRiskId(id);
+
+        model.addAttribute("risk", risk);
+        model.addAttribute("resolveReports", resolveReports);
+        return "public/risk-detail"; // View hiển thị chi tiết
+    }
+
 }

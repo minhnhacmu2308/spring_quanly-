@@ -82,4 +82,9 @@ public class RiskServiceImpl implements RiskService {
     public List<Risk> getRisksByProjectId(Long projectId) {
         return riskRepository.findByProjectId(projectId);
     }
+
+    @Override
+    public List<Risk> getRisksByRiskSolverId(Long riskSolverId) {
+        return riskRepository.findRisksByProjectRiskSolverId(riskSolverId);
+    }
 }

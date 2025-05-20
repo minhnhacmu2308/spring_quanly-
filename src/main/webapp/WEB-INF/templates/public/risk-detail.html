@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="public/fragments :: html_head"></head>
+<body>
+<header th:replace="public/fragments ::html_header(hasUnread=${hasUnread})"></header>
+<th:block th:replace="public/fragments :: html_toast_notification"></th:block>
+
+<main id="content" role="main" class="main pointer-event">
+    <div class="content container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-end">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <h1 class="page-header-title">Risk Detail</h1>
+                </div>
+                <div class="col-sm-auto">
+                    <a th:href="@{/user/risk}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to risks
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Detail Section -->
+        <section class="mb-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5">Reported By:</dt>
+                        <dd class="col-sm-7" th:text="${risk.reportedBy.fullName}"></dd>
+
+                        <dt class="col-sm-5">Reported At:</dt>
+                        <dd class="col-sm-7" th:text="${#temporals.format(risk.reportedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+
+                        <dt class="col-sm-5">Severity:</dt>
+                        <dd class="col-sm-7" th:text="${risk.severity}"></dd>
+
+                        <dt class="col-sm-5">Status:</dt>
+                        <dd class="col-sm-7" th:text="${risk.status}"></dd>
+
+                        <dt class="col-sm-5">Approval:</dt>
+                        <dd class="col-sm-7" th:text="${risk.approveStatus}"></dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5">Category Risk:</dt>
+                        <dd class="col-sm-7" th:text="${risk.categoryRisk.name}"></dd>
+
+                        <dt class="col-sm-5">Last Updated:</dt>
+                        <dd class="col-sm-7" th:text="${#temporals.format(risk.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+
+                        <dt class="col-sm-5">File:</dt>
+                        <dd class="col-sm-7">
+                            <a class="btn btn-sm btn-outline-danger" th:href="@{${risk.filePath}}" target="_blank">
+                                <i class="bi bi-eye-fill"></i> View File
+                            </a>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h4>Information</h4>
+                <p th:text="${risk.information}"></p>
+
+                <h4 class="mt-3">Solution</h4>
+                <p th:text="${risk.solution}"></p>
+                <h4 class="mt-5">Resolved Reports</h4>
+                <div th:if="${resolveReports != null and !resolveReports.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Resolved By</th>
+                                <th>Resolved Date</th>
+                                <th>File resolved</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="report, iterStat : ${resolveReports}">
+                                <td th:text="${iterStat.count}"></td>
+                                <td th:text="${report.resolvedBy.fullName}"></td>
+                                <td th:text="${#temporals.format(report.resolvedDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <a class="btn btn-sm btn-outline-danger" th:href="@{${report.filePath}}" target="_blank">
+                                        <i class="bi bi-eye-fill"></i> View File
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div th:if="${resolveReports == null or resolveReports.isEmpty()}">
+                    <p class="text-muted">No resolved reports yet.</p>
+                </div>
+
+            </div>
+        </section>
+    </div>
+</main>
+
+<script th:src="@{/public/assets/js/demo.js}"></script>
+</body>
+</html>
