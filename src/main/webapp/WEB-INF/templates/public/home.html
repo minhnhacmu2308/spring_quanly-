@@ -14,160 +14,84 @@
     <div class="row gx-2 gx-lg-3">
       <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
         <!-- Card -->
-        <a class="card card-hover-shadow h-100" href="#">
+        <div class="card card-hover-shadow h-80">
           <div class="card-body">
             <h6 class="card-subtitle">Total Projects</h6>
 
             <div class="row align-items-center gx-2 mb-1">
-              <div class="col-6">
-                <span class="card-title h2">50</span>
-              </div>
-
-              <div class="col-6">
-                <!-- Chart -->
-                <div class="chartjs-custom" style="height: 3rem;">
-                  <canvas class="js-chart" data-hs-chartjs-options='{
-                        "type": "line",
-                        "data": {
-                           "labels": ["1 May","2 May","3 May","4 May","5 May","6 May","7 May"],
-                           "datasets": [{
-                            "data": [10,15,12,17,19,22,25],
-                            "backgroundColor": ["rgba(55, 125, 255, 0)", "rgba(255, 255, 255, 0)"],
-                            "borderColor": "#377dff",
-                            "borderWidth": 2,
-                            "pointRadius": 0,
-                            "pointHoverRadius": 0
-                          }]
-                        },
-                        "options": {
-                           "scales": {
-                             "yAxes": [{ "display": false }],
-                             "xAxes": [{ "display": false }]
-                           },
-                          "hover": { "mode": "nearest", "intersect": false },
-                          "tooltips": { "postfix": " items", "hasIndicator": true, "intersect": false }
-                        }
-                      }'>
-                  </canvas>
-                </div>
-                <!-- End Chart -->
+              <div class="col-12">
+                <span class="card-title h2" th:text="${totalProjects}">0</span>
               </div>
             </div>
             <!-- End Row -->
 
-            <span class="badge badge-soft-success">
-          <i class="tio-trending-up"></i> 8.2%
-        </span>
-            <span class="text-body font-size-sm ml-1">from 30</span>
+            <a href="/user/project" class="btn btn-sm btn-link mt-2 p-0">View Detail</a>
+
           </div>
-        </a>
+        </div>
         <!-- End Card -->
       </div>
 
+
       <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
         <!-- Card -->
-        <a class="card card-hover-shadow h-100" href="#">
+        <div class="card card-hover-shadow h-80">
           <div class="card-body">
             <h6 class="card-subtitle">Total Risks</h6>
 
             <div class="row align-items-center gx-2 mb-1">
-              <div class="col-6">
-                <span class="card-title h2">250</span>
-              </div>
-
-              <div class="col-6">
-                <!-- Chart -->
-                <div class="chartjs-custom" style="height: 3rem;">
-                  <canvas class="js-chart" data-hs-chartjs-options='{
-                        "type": "line",
-                        "data": {
-                           "labels": ["1 May","2 May","3 May","4 May","5 May","6 May","7 May"],
-                           "datasets": [{
-                            "data": [50,42,32,37,29,18,25],
-                            "backgroundColor": ["rgba(55, 125, 255, 0)", "rgba(255, 255, 255, 0)"],
-                            "borderColor": "#377dff",
-                            "borderWidth": 2,
-                            "pointRadius": 0,
-                            "pointHoverRadius": 0
-                          }]
-                        },
-                        "options": {
-                           "scales": {
-                             "yAxes": [{ "display": false }],
-                             "xAxes": [{ "display": false }]
-                           },
-                          "hover": { "mode": "nearest", "intersect": false },
-                          "tooltips": { "postfix": " items", "hasIndicator": true, "intersect": false }
-                        }
-                      }'>
-                  </canvas>
-                </div>
-                <!-- End Chart -->
+              <div class="col-12">
+                <span class="card-title h2" th:text="${totalRisks}">0</span>
               </div>
             </div>
             <!-- End Row -->
 
-            <span class="badge badge-soft-danger">
-          <i class="tio-trending-down"></i> 38.6%
-        </span>
-            <span class="text-body font-size-sm ml-1">from 230</span>
+            <a href="/user/risk" class="btn btn-sm btn-link mt-2 p-0">View Detail</a>
+
           </div>
-        </a>
+        </div>
         <!-- End Card -->
       </div>
-
       <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
         <!-- Card -->
-        <a class="card card-hover-shadow h-100" href="#">
+        <div class="card card-hover-shadow h-80">
           <div class="card-body">
-            <h6 class="card-subtitle">Total Costs</h6>
+            <h6 class="card-subtitle">Total Budget</h6>
 
             <div class="row align-items-center gx-2 mb-1">
-              <div class="col-6">
-                <span class="card-title h2">1,350</span>
-              </div>
-
-              <div class="col-6">
-                <!-- Chart -->
-                <div class="chartjs-custom" style="height: 3rem;">
-                  <canvas class="js-chart" data-hs-chartjs-options='{
-                        "type": "line",
-                        "data": {
-                           "labels": ["1 May","2 May","3 May","4 May","5 May","6 May","7 May"],
-                           "datasets": [{
-                            "data": [400,350,230,380,200,320,250],
-                            "backgroundColor": ["rgba(55, 125, 255, 0)", "rgba(255, 255, 255, 0)"],
-                            "borderColor": "#377dff",
-                            "borderWidth": 2,
-                            "pointRadius": 0,
-                            "pointHoverRadius": 0
-                          }]
-                        },
-                        "options": {
-                           "scales": {
-                             "yAxes": [{ "display": false }],
-                             "xAxes": [{ "display": false }]
-                           },
-                          "hover": { "mode": "nearest", "intersect": false },
-                          "tooltips": { "postfix": " orders", "hasIndicator": true, "intersect": false }
-                        }
-                      }'>
-                  </canvas>
-                </div>
-                <!-- End Chart -->
+              <div class="col-12">
+                <span class="card-title h2" th:text="${totalBudget}">0</span>
               </div>
             </div>
             <!-- End Row -->
 
-            <span class="badge badge-soft-danger">
-          <i class="tio-trending-down"></i> 5.5%
-        </span>
-            <span class="text-body font-size-sm ml-1">from 1,280</span>
+            <span class="btn btn-sm btn-link mt-2 p-0">VND</span>
+
           </div>
-        </a>
+        </div>
+        <!-- End Card -->
+      </div>
+      <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
+        <!-- Card -->
+        <div class="card card-hover-shadow h-80">
+          <div class="card-body">
+            <h6 class="card-subtitle">Total Cost</h6>
+
+            <div class="row align-items-center gx-2 mb-1">
+              <div class="col-12">
+                <span class="card-title h2" th:text="${totalExpenses}">0</span>
+              </div>
+            </div>
+            <!-- End Row -->
+
+            <span class="btn btn-sm btn-link mt-2 p-0">VND</span>
+
+          </div>
+        </div>
         <!-- End Card -->
       </div>
     </div>
+  </div>
     <!-- End Stats -->
 
     <div class="row justify-content-sm-center text-center py-10">

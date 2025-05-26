@@ -165,10 +165,14 @@
                                             </th:block>
                                         </th:block>
 
-                                        <th:block th:if="${#strings.endsWith(doc.filePath, '.docx')}">
-                                            <p>This file cannot be previewed. Please download.</p>
-                                            <a th:href="${doc.filePath}" class="btn btn-success" target="_blank">Download document</a>
-                                        </th:block>
+                                            <th:block th:if="${#strings.endsWith(doc.filePath, '.docx')}">
+                                                <iframe class="doc-preview"
+                                                        th:src="'https://view.officeapps.live.com/op/embed.aspx?src=' + ${doc.filePath}"
+                                                        width="100%" height="950px"
+                                                        style="border: none;">
+                                                </iframe>
+                                            </th:block>
+
                                     </div>
                                 </div>
                             </div>

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
@@ -30,4 +31,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     public Expense createExpense(Expense expense) {
         return expenseRepository.save(expense);
     }
+
+    @Override
+    public BigDecimal getTotalExpenses() {
+        return Optional.ofNullable(expenseRepository.sumAllExpenses())
+                .orElse(BigDecimal.ZERO);
+    }
+
 }

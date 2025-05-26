@@ -192,11 +192,14 @@
                                             <input type="hidden" name="id" th:value="${project.projectId}" />
                                             <div class="row">
                                                 <!-- Cột trái -->
-                                                <div class="col-md-6">
+                                                <div class="col-md-12">
                                                     <div class="form-group">
                                                         <label>Project Name</label>
                                                         <input type="text" class="form-control" th:value="${project.projectName}" name="projectName" required>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-6">
+
 
                                                     <div class="form-group">
                                                         <label>Field Staff</label>
@@ -256,9 +259,10 @@
                                                             <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
                                                         </select>
                                                     </div>
-
+                                                </div>
+                                                <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label>Project Risks</label>
+                                                        <label>Foreseeable Risks</label>
                                                         <div th:id="'risks-container-' + ${project.projectId}">
                                                             <th:block th:each="risk, iterStat : ${project.risks}">
                                                                 <th:block th:if="${risk.categoryRisk.id == 1}">
@@ -279,12 +283,12 @@
                                                                                    th:name="'risks[' + ${iterStat.index} + '].riskId'"
                                                                                    th:value="${risk.riskId}" />
                                                                         </div>
-                                                                        <button type="button"
-                                                                                class="btn btn-outline-danger btn-xs p-1 px-2 mt-md-0 mt-1"
-                                                                                style="font-size: 0.75rem; line-height: 1;"
-                                                                                onclick="removeRisk(this)">
-                                                                            &times;
-                                                                        </button>
+<!--                                                                        <button type="button"-->
+<!--                                                                                class="btn btn-outline-danger btn-xs p-1 px-2 mt-md-0 mt-1"-->
+<!--                                                                                style="font-size: 0.75rem; line-height: 1;"-->
+<!--                                                                                onclick="removeRisk(this)">-->
+<!--                                                                            &times;-->
+<!--                                                                        </button>-->
                                                                     </div>
                                                                 </th:block>
                                                             </th:block>
@@ -437,12 +441,15 @@
                 <div class="modal-body">
                     <form th:action="@{/user/project/create}" method="post" id="projectForm">
                         <div class="row">
-                            <!-- Cột trái -->
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="projectName">Project Name</label>
                                     <input type="text" class="form-control" id="projectName" name="projectName" required>
                                 </div>
+                            </div>
+                            <!-- Cột trái -->
+                            <div class="col-md-6">
+
                                 <div class="form-group">
                                     <label for="fieldStaffId">Field Staff</label>
                                     <select class="form-control" id="fieldStaffId" name="field_staff_id" required>
@@ -480,8 +487,6 @@
                                     <small class="text-danger" id="accountantError"></small>
                                 </div>
                             </div>
-
-                            <!-- Cột phải -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="budget">Budget</label>
@@ -505,8 +510,11 @@
                                         <option value="ON_HOLD">On Hold</option>
                                     </select>
                                 </div>
+                            </div>
+                            <!-- Cột phải -->
+                            <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Project Risks</label>
+                                    <label>Foreseeable Risks</label>
                                     <div id="risks-container">
                                         <div class="risk-item mb-2 d-flex flex-column flex-md-row gap-2 align-items-start" data-index="0">
                                             <div class="flex-grow-1">

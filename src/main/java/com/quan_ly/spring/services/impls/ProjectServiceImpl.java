@@ -11,6 +11,7 @@ import com.quan_ly.spring.utils.EncrytedPasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,5 +71,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<Project> getProjectByUserAndDateNew(User user) {
         return projectRepository.findActiveProjectsByUserAll(user);
+    }
+
+    @Override
+    public long countProjects() {
+        return projectRepository.count();
+    }
+
+    @Override
+    public BigDecimal getTotalBudget() {
+        return Optional.ofNullable(projectRepository.sumAllBudgets())
+                .orElse(BigDecimal.ZERO);
     }
 }

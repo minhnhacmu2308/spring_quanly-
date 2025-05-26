@@ -22,4 +22,5 @@ public interface RiskService {
 
     List<Risk> getRisksByRiskSolverId(Long riskSolverId);
 
+    long countRisks();
 }
